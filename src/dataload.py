@@ -91,23 +91,35 @@ def load_data(args, DATA_PATH):
         tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
         
     input_ids = [tokenizer.encode(sent, add_special_tokens=True, max_length=args.MAX_LEN,pad_to_max_length=True) for sent in uttr_input]
+    input_ids_2 = [tokenizer.encode(sent, add_special_tokens=True, max_length=args.MAX_LEN,pad_to_max_length=True) for sent in Utterance_2]
     input_ids_3 = [tokenizer.encode(sent, add_special_tokens=True, max_length=args.MAX_LEN,pad_to_max_length=True) for sent in Utterance_3]
     
     attention_masks = [[float(i>0) for i in seq] for seq in input_ids]
+    attention_masks_2 = [[float(i>0) for i in seq] for seq in input_ids_2]
     attention_masks_3 = [[float(i>0) for i in seq] for seq in input_ids_3]
     
     
     ## utterance VAD values
     VAD_dict = get_vad_dict()
-    uttr_vad = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids]
+    
+    
+    # uttr_vad = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids]
+    uttr_vad = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids_2]
+    
     u3_vad = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids_3]
     
     ## Train Test Split
     train_inputs,test_inputs,train_labels,test_labels = \
         train_test_split(input_ids, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
     
+    train_inputs_2,test_inputs_2,train_labels,test_labels = \
+        train_test_split(input_ids_2, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
+    
     train_inputs_3,test_inputs_3,train_labels,test_labels = \
         train_test_split(input_ids_3, labels, random_state=args.SEED, test_size=0.1, stratify=labels) 
+    
+    train_attn_masks_2,test_attn_masks_2,train_labels,test_labels = \
+        train_test_split(attention_masks_2, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
     
     train_attn_masks,test_attn_masks,train_labels,test_labels = \
         train_test_split(attention_masks, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
@@ -117,6 +129,10 @@ def load_data(args, DATA_PATH):
     
     train_init_emo,test_init_emo,_,_ = \
         train_test_split(init_emo, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
+    
+    train_user_emo,test_user_emo,_,_ = \
+        train_test_split(user_emo, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
+    
     train_response_emo,test_response_emo,_,_ = \
         train_test_split(response_emo, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
     
@@ -136,8 +152,14 @@ def load_data(args, DATA_PATH):
     train_inputs,valid_inputs,train_labels,valid_labels = \
         train_test_split(train_inputs, train_set_labels, random_state=args.SEED, test_size=0.1, stratify=train_set_labels)
     
+    train_inputs_2,valid_inputs_2,train_labels,valid_labels = \
+        train_test_split(train_inputs_2, train_set_labels, random_state=args.SEED, test_size=0.1, stratify=train_set_labels)
+    
     train_inputs_3,valid_inputs_3,train_labels,valid_labels = \
         train_test_split(train_inputs_3, train_set_labels, random_state=args.SEED, test_size=0.1, stratify=train_set_labels) 
+    
+    train_attn_masks_2,valid_attn_masks_2,train_labels,valid_labels = \
+        train_test_split(train_attn_masks_2, train_set_labels, random_state=args.SEED, test_size=0.1, stratify=train_set_labels)
     
     train_attn_masks,valid_attn_masks,train_labels,valid_labels = \
         train_test_split(train_attn_masks, train_set_labels, random_state=args.SEED, test_size=0.1, stratify=train_set_labels)
@@ -147,6 +169,8 @@ def load_data(args, DATA_PATH):
 
     train_init_emo,valid_init_emo,_,_ = \
         train_test_split(train_init_emo, train_set_labels, random_state=args.SEED, test_size=0.1, stratify=train_set_labels)
+    train_user_emo,valid_user_emo,_,_ = \
+        train_test_split(train_user_emo, train_set_labels, random_state=args.SEED, test_size=0.1, stratify=train_set_labels)
     train_response_emo,valid_response_emo,_,_ = \
         train_test_split(train_response_emo, train_set_labels, random_state=args.SEED, test_size=0.1, stratify=train_set_labels)
     
@@ -166,9 +190,17 @@ def load_data(args, DATA_PATH):
     valid_inputs      = torch.tensor(valid_inputs)
     test_inputs       = torch.tensor(test_inputs)
     
+    train_inputs_2      = torch.tensor(train_inputs_2)
+    valid_inputs_2      = torch.tensor(valid_inputs_2)
+    test_inputs_2       = torch.tensor(test_inputs_2)
+    
     train_inputs_3      = torch.tensor(train_inputs_3)
     valid_inputs_3      = torch.tensor(valid_inputs_3)
     test_inputs_3       = torch.tensor(test_inputs_3)
+    
+    train_attn_masks_2 = torch.tensor(train_attn_masks_2)
+    valid_attn_masks_2 = torch.tensor(valid_attn_masks_2)
+    test_attn_masks_2  = torch.tensor(test_attn_masks_2)
     
     train_attn_masks = torch.tensor(train_attn_masks)
     valid_attn_masks = torch.tensor(valid_attn_masks)
@@ -190,6 +222,10 @@ def load_data(args, DATA_PATH):
     valid_init_emo      = torch.tensor(valid_init_emo)
     test_init_emo       = torch.tensor(test_init_emo)
     
+    train_user_emo      = torch.tensor(train_user_emo)
+    valid_user_emo      = torch.tensor(valid_user_emo)
+    test_user_emo       = torch.tensor(test_user_emo)
+    
     train_response_emo  = torch.tensor(train_response_emo)
     valid_response_emo  = torch.tensor(valid_response_emo)
     test_response_emo   = torch.tensor(test_response_emo)
@@ -203,15 +239,15 @@ def load_data(args, DATA_PATH):
     test_response_mood   = torch.tensor(test_response_mood)
     
 
-    train_data = TensorDataset(train_inputs, train_inputs_3, train_attn_masks, train_uttr_vad, train_personalities, train_init_emo, train_response_emo, train_init_mood, train_response_mood, train_labels)
+    train_data = TensorDataset(train_inputs, train_inputs_2, train_inputs_3, train_attn_masks, train_attn_masks_2, train_uttr_vad, train_personalities, train_init_emo, train_user_emo, train_response_emo, train_init_mood, train_response_mood, train_labels)
     train_sampler = RandomSampler(train_data)
     train_dataloader = DataLoader(train_data, sampler=train_sampler, batch_size=args.batch_size)
 
-    valid_data = TensorDataset(valid_inputs, valid_inputs_3, valid_attn_masks, valid_uttr_vad, valid_personalities, valid_init_emo, valid_response_emo, valid_init_mood, valid_response_mood, valid_labels)
+    valid_data = TensorDataset(valid_inputs, valid_inputs_2, valid_inputs_3, valid_attn_masks, valid_attn_masks_2, valid_uttr_vad, valid_personalities, valid_init_emo, valid_user_emo, valid_response_emo, valid_init_mood, valid_response_mood, valid_labels)
     valid_sampler = RandomSampler(valid_data)
     valid_dataloader = DataLoader(valid_data, sampler=valid_sampler, batch_size=args.batch_size)
 
-    test_data = TensorDataset(test_inputs, test_inputs_3, test_attn_masks, test_uttr_vad, test_personalities, test_init_emo, test_response_emo, test_init_mood, test_response_mood, test_labels)
+    test_data = TensorDataset(test_inputs, test_inputs_2, test_inputs_3, test_attn_masks, test_attn_masks_2, test_uttr_vad, test_personalities, test_init_emo, test_user_emo, test_response_emo, test_init_mood, test_response_mood, test_labels)
     test_sampler = RandomSampler(test_data)
     test_dataloader = DataLoader(test_data, sampler=test_sampler, batch_size=args.batch_size)
 

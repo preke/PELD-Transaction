@@ -16,7 +16,7 @@ DATA_PATH = '../Dyadic_PELD.tsv'
 parser = argparse.ArgumentParser(description='')
 args = parser.parse_args()
 
-args.device        = 0
+args.device        = 1
 args.base          = 'BERT'
 args.SEED          = 42
 args.MAX_LEN       = 256 
@@ -25,6 +25,13 @@ args.lr            = 1e-5
 args.adam_epsilon  = 1e-8
 args.epochs        = 50
 args.result_name   = args.base + '_Personality_back_no_dropout_epochs_'+str(args.epochs)+'_Batchsize_'+str(args.batch_size)+'_.csv'
+
+
+
+np.random.seed(args.SEED)
+torch.manual_seed(args.SEED)
+torch.cuda.manual_seed_all(args.SEED)
+
 
 ## LOAD DATA
 from dataload import load_data
