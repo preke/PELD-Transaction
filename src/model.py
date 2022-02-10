@@ -39,7 +39,7 @@ class Emo_Generation(BertPreTrainedModel):
         bert_outputs = self.bert(input_ids, attention_mask=attn_masks)
         bert_hidden = bert_outputs[1]
         response_mood = init_mood + uttr_vad
-        emo_embedding = bert_hidden + self.mood_to_hidden(response_mood)
+        emo_embedding = bert_hidden # + self.mood_to_hidden(response_mood)
         response_emo = self.classifier(emo_embedding)
         return response_emo, response_mood 
 
