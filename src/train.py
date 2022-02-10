@@ -18,16 +18,16 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
     num_warmup_steps = 0
     num_training_steps = len(train_dataloader)*args.epochs
     
-    '''
-    for name, param in model.named_parameters(): 
-        if name.startswith('bert'):
-            param.requires_grad = False
-        else:
-            print(name,param.size())
-        if name.startswith('bert.pooler'):
-            param.requires_grad = True
-            print(name, param.size())    
-    '''
+    
+    # for name, param in model.named_parameters(): 
+    #     if name.startswith('bert'):
+    #         param.requires_grad = False
+    #     else:
+    #         print(name,param.size())
+    #     if name.startswith('bert.pooler'):
+    #         param.requires_grad = True
+    #         print(name, param.size())    
+    
             
     optimizer = AdamW(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr, eps=args.adam_epsilon, correct_bias=False)  # To reproduce BertAdam specific behavior set correct_bias=False
     scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=num_training_steps)  # PyTorch scheduler
@@ -70,7 +70,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             emo_loss      = emo_loss_fct(logits, b_labels)
             mood_loss     = mood_loss_fct(m_r, b_response_mood)
             # user_loss     = user_loss_fct(user_emo, b_user_emo)
-            loss          = emo_loss # + mood_loss # + user_loss
+            loss          = emo_loss + mood_loss # + user_loss
             
             logits        = logits.detach().to('cpu').numpy()
             label_ids     = b_labels.to('cpu').numpy()                

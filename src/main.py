@@ -29,12 +29,11 @@ args.epochs        = 50
 seed_list = [0,1,2,41,42,123, 234, 345, 456, 567]
 for seed in  seed_list:
     args.SEED          = seed
-    args.result_name   = 'Only_BERT_' + str(args.SEED) + '.csv'
+    args.result_name   = 'Mood_transition_2' + str(args.SEED) + '.csv'
 
     np.random.seed(args.SEED)
     torch.manual_seed(args.SEED)
     torch.cuda.manual_seed_all(args.SEED)
-
 
     ## LOAD DATA
     from dataload import load_data

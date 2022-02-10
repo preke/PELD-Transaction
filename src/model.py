@@ -7,7 +7,7 @@ import re
 
 # ======== BERT ========
 
-class ClassificationHead(nn.Module):
+class Dense(nn.Module):
     
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()        
@@ -28,19 +28,20 @@ class Emo_Generation(BertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
         self.num_labels = 7
-        self.mid_size = 100 
+        self.mid_size = 100
         self.bert = BertModel(config)
-        
+        self.mood_dense = Dense(3, config.hidden_size, 3)
         self.mood_to_hidden = nn.Linear(3, config.hidden_size)
+        self.personality_to_hidden = nn.Linear(3, config.hidden_size)
         self.classifier = nn.Linear(config.hidden_size, 7)
 
     def forward(self, input_ids, attn_masks, uttr_vad, personality, init_mood):
         
-        bert_outputs = self.bert(input_ids, attention_mask=attn_masks)
-        bert_hidden = bert_outputs[1]
-        response_mood = init_mood + uttr_vad
-        emo_embedding = bert_hidden # + self.mood_to_hidden(response_mood)
-        response_emo = self.classifier(emo_embedding)
+        bert_outputs  = self.bert(input_ids, attention_mask=attn_masks)
+        bert_hidden   = bert_outputs[1]
+        response_mood = self.mood_dense(init_mood + uttr_vad * personality)
+        emo_embedding = bert_hidden + self.mood_to_hidden(response_mood) + self.personality_to_hidden(personality)
+        response_emo  = self.classifier(emo_embedding)
         return response_emo, response_mood 
 
 # ======== RoBERTa ========
