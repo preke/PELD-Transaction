@@ -28,7 +28,7 @@ class Emo_Generation(BertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
         self.num_labels = 7
-        self.mid_size = long(config.hidden_size * 0.5)
+        self.mid_size = int(config.hidden_size * 0.5)
         self.bert = BertModel(config)
         self.mood_dense = Dense(3, config.hidden_size, 3)
         self.mood_to_hidden = Dense(3, config.hidden_size, self.mid_size)
