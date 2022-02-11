@@ -20,7 +20,6 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
     
     
     for name, param in model.named_parameters(): 
-        print(name,param.size())
         if name.startswith('bert'):
             param.requires_grad = False
         else:
