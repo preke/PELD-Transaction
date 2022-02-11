@@ -21,15 +21,14 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
     
     for name, param in model.named_parameters(): 
         print(name,param.size())
-        # if name.startswith('bert'):
-        #     param.requires_grad = False
-        # else:
-        #     print(name,param.size())
-        # if name.startswith('bert.pooler'):
-        #     param.requires_grad = True
-        #     print(name, param.size())
-    import time
-    time.sleep(1000)    
+        if name.startswith('bert'):
+            param.requires_grad = False
+        else:
+            print(name,param.size())
+        if name.startswith('bert.pooler') or name.startswith('bert.encoder.layer.10') or name.startswith('bert.encoder.layer.11'):
+            param.requires_grad = True
+            print(name, param.size())
+  
     
             
     optimizer = AdamW(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr, eps=args.adam_epsilon, correct_bias=False)  # To reproduce BertAdam specific behavior set correct_bias=False
