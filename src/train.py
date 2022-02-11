@@ -28,8 +28,8 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         # if name.startswith('bert.pooler'):
         #     param.requires_grad = True
         #     print(name, param.size())
-        import time
-        time.sleep(1000)    
+    import time
+    time.sleep(1000)    
     
             
     optimizer = AdamW(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr, eps=args.adam_epsilon, correct_bias=False)  # To reproduce BertAdam specific behavior set correct_bias=False
