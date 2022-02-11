@@ -19,7 +19,7 @@ args = parser.parse_args()
 args.device        = 0
 args.base          = 'BERT'
 
-args.MAX_LEN       = 256 
+args.MAX_LEN       = 128 
 args.batch_size    = 16
 args.lr            = 1e-5
 args.adam_epsilon  = 1e-8
