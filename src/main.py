@@ -29,7 +29,7 @@ args.epochs        = 50
 seed_list = [42] # 0,1,2,41,42,123, 234, 345, 456, 567
 for seed in  seed_list:
     args.SEED          = seed
-    args.result_name   = 'uttr_vad_Mood_transition_3_' + str(args.SEED) + '.csv'
+    args.result_name   = 'personality_mood_Mood_transition_3_' + str(args.SEED) + '.csv'
 
     np.random.seed(args.SEED)
     torch.manual_seed(args.SEED)
