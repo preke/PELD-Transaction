@@ -36,6 +36,8 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
     train_logs = []
     valid_logs = []
     test_logs  = []
+
+    mood_loss_list = []
     
     best_macro = 0.0
     model.zero_grad()
@@ -59,8 +61,8 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             b_init_emo, b_user_emo, b_response_emo, b_init_mood, b_response_mood, b_labels = batch
             
             # logits, m_r, user_emo = model(b_input_ids_2, b_attn_masks_2, b_uttr_vad, b_personality, b_init_mood)
-            # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
-            logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
+            logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
+            # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
             
 
             
@@ -75,6 +77,9 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             mood_loss     = mood_loss_fct(m_r, b_response_mood)
             # user_loss     = user_loss_fct(user_emo, b_user_emo)
             loss          = emo_loss + mood_loss # + user_loss
+            mood_loss_list.append(mood_loss)
+            print(mood_loss_list)
+
             
             logits        = logits.detach().to('cpu').numpy()
             label_ids     = b_labels.to('cpu').numpy()                
@@ -173,8 +178,8 @@ def eval_model(model, valid_dataloader, args, valid_logs):
         with torch.no_grad():
           # Forward pass, calculate logit predictions
           # logits, m_r, user_emo = model(b_input_ids_2, b_attn_masks_2, b_uttr_vad, b_personality, b_init_mood)
-          #  logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
-            logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
+          logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
+          # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
         
         mood_loss_fct = nn.MSELoss()
         emo_loss_fct  = nn.CrossEntropyLoss() 
@@ -226,8 +231,8 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0):
         with torch.no_grad():
           # Forward pass, calculate logit predictions
           # logits, m_r, user_emo = model(b_input_ids_2, b_attn_masks_2, b_uttr_vad, b_personality, b_init_mood)
-          # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
-            logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
+            logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
+            # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
         
         mood_loss_fct = nn.MSELoss()
         emo_loss_fct  = nn.CrossEntropyLoss() 
