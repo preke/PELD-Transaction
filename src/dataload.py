@@ -104,7 +104,8 @@ def load_data(args, DATA_PATH):
     
     
     # uttr_vad = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids]
-    uttr_vad = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids_2]
+    # uttr_vad = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids_2]
+    uttr_vad = [Emotion_dict[i] for i in user_emo]
     
     u3_vad = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids_3]
     
