@@ -77,8 +77,8 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             mood_loss     = mood_loss_fct(m_r, b_response_mood)
             # user_loss     = user_loss_fct(user_emo, b_user_emo)
             loss          = emo_loss + mood_loss # + user_loss
-            mood_loss_list.append(mood_loss)
-            print(mood_loss_list)
+            mood_loss_list.append(mood_loss.item())
+            
 
             
             logits        = logits.detach().to('cpu').numpy()
@@ -138,6 +138,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         valid_logs = eval_model(model, valid_dataloader, args, valid_logs)
         test_logs, pred_list, best_macro  = test_model(model, test_dataloader, args, test_logs, best_macro)
         print('Current best macro is ', best_macro)
+        print(mood_loss_list)
 
     df_train_logs = pd.DataFrame(train_logs, columns=['label', 'precision', 'recall', 'f1-score', 'support']).add_prefix('train_')
     df_valid_logs = pd.DataFrame(valid_logs, columns=['precision', 'recall', 'f1-score', 'support']).add_prefix('valid_')
