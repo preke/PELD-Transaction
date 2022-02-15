@@ -38,6 +38,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
     test_logs  = []
 
     mood_loss_list = []
+    loss_list = []
     
     best_macro = 0.0
     model.zero_grad()
@@ -46,6 +47,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         print("<" + "="*22 + F" Epoch {_} "+ "="*22 + ">")
         # Calculate total loss for this epoch
         batch_loss = 0
+        mood_batch_loss = 0
         
         train_accuracy, nb_train_steps = 0, 0
         
@@ -77,8 +79,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             mood_loss     = mood_loss_fct(m_r, b_response_mood)
             # user_loss     = user_loss_fct(user_emo, b_user_emo)
             loss          = emo_loss + mood_loss # + user_loss
-            mood_loss_list.append(mood_loss.item())
-            
+                        
 
             
             logits        = logits.detach().to('cpu').numpy()
@@ -105,13 +106,21 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             optimizer.zero_grad()
             # Update tracking variables
             batch_loss += loss.item()
+            mood_batch_loss += mood_loss.item()
       
         #  Calculate the average loss over the training data.
         avg_train_loss = batch_loss / len(train_dataloader)
+        avg_mood_batch_loss = mood_batch_loss / len(train_dataloader)
 
         #store the current learning rate
         for param_group in optimizer.param_groups:
             print("\n\tCurrent Learning rate: ",param_group['lr'])
+
+        print("\n\tCurrent overall loss: ", avg_train_loss)
+        print("\n\tCurrent mood loss: ", avg_mood_batch_loss)
+
+        mood_loss_list.append(avg_mood_batch_loss)
+        loss_list.append(avg_train_loss)
         
         print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
         result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
@@ -138,11 +147,14 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         valid_logs = eval_model(model, valid_dataloader, args, valid_logs)
         test_logs, pred_list, best_macro  = test_model(model, test_dataloader, args, test_logs, best_macro)
         print('Current best macro is ', best_macro)
-        print(mood_loss_list)
+        print('loss list', loss_list)
+        print('mood loss list', mood_loss_list)
 
     df_train_logs = pd.DataFrame(train_logs, columns=['label', 'precision', 'recall', 'f1-score', 'support']).add_prefix('train_')
     df_valid_logs = pd.DataFrame(valid_logs, columns=['precision', 'recall', 'f1-score', 'support']).add_prefix('valid_')
     df_test_logs  = pd.DataFrame(test_logs, columns=['precision', 'recall', 'f1-score', 'support']).add_prefix('test_')
+
+
 
     df_all = pd.concat([df_train_logs, df_valid_logs, df_test_logs], axis=1)
     df_all.to_csv(args.result_name, index=False)
