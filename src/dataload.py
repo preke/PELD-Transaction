@@ -86,7 +86,7 @@ def load_data(args, DATA_PATH):
     labels       = label_enc
     
     if args.base == 'RoBERTa':
-        tokenizer   = RobertaTokenizer.from_pretrained("roberta-base", do_lower_case=True)
+        tokenizer  = RobertaTokenizer.from_pretrained("roberta-base", do_lower_case=True)
     elif args.base == 'BERT':
         tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
         
@@ -105,8 +105,8 @@ def load_data(args, DATA_PATH):
     
     # uttr_vad = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids]
     # uttr_vad = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids_2]
-
-    uttr_vad = [[(user_emo[i][0] + init_emo[i][0])/2.0, (user_emo[i][1] + init_emo[i][1])/2.0, (user_emo[i][2] + init_emo[i][2])/2.0]for i in range(len(user_emo))]
+    uttr_vad = user_emo
+    # uttr_vad = [[(user_emo[i][0] + init_emo[i][0])/2.0, (user_emo[i][1] + init_emo[i][1])/2.0, (user_emo[i][2] + init_emo[i][2])/2.0]for i in range(len(user_emo))]
     
     u3_vad = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids_3]
     
