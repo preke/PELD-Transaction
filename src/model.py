@@ -40,10 +40,10 @@ class Emo_Generation(BertPreTrainedModel):
         
         bert_outputs  = self.bert(input_ids, attention_mask=attn_masks)
         bert_hidden   = bert_outputs[1]
-        response_mood = self.mood_dense(init_mood + uttr_vad * personality)
+        response_mood = self.mood_dense(init_mood)
         # response_mood = self.mood_dense(uttr_vad*personality)
         
-        # response_mood = init_mood
+        response_mood = init_mood
         emo_embedding = torch.cat((self.mood_to_hidden(response_mood), self.hidden_resize(bert_hidden)), 1) + self.personality_to_hidden(personality)
         response_emo  = self.classifier(emo_embedding)
         return response_emo, response_mood 
