@@ -34,18 +34,22 @@ class Emo_Generation(BertPreTrainedModel):
         self.mood_to_hidden = Dense(3, config.hidden_size, self.mid_size)
         self.hidden_resize = Dense(config.hidden_size, config.hidden_size, self.mid_size)
         self.personality_to_hidden = nn.Linear(3, config.hidden_size)
+
+        self.personality_to_1 = nn.Linear(3, 1)
+        self.hidden_to_vad = Dense(config.hidden_size, config.hidden_size, 3)
+
         self.classifier = nn.Linear(config.hidden_size, 7)
 
     def forward(self, input_ids, attn_masks, uttr_vad, personality, init_mood):
         
-        bert_outputs  = self.bert(input_ids, attention_mask=attn_masks)
-        bert_hidden   = bert_outputs[1]
-        # response_mood = self.mood_dense(init_mood)
-        response_mood = self.mood_dense(init_mood + uttr_vad*personality)
+        bert_outputs   = self.bert(input_ids, attention_mask=attn_masks)
+        bert_hidden    = bert_outputs[1]
         
-        # response_mood = init_mood
-        emo_embedding = torch.cat((self.mood_to_hidden(response_mood), self.hidden_resize(bert_hidden)), 1) + self.personality_to_hidden(personality)
-        response_emo  = self.classifier(emo_embedding)
+        response_mood_ = torch.cat((self.mood_to_hidden(init_mood) + self.hidden_resize(bert_hidden)*self.personality_to_1(personality)), 1)
+        response_mood  = self.hidden_to_vad(response_mood_)
+
+        emo_embedding  = torch.cat((self.mood_to_hidden(response_mood), self.hidden_resize(bert_hidden)), 1) + self.personality_to_hidden(personality)
+        response_emo   = self.classifier(emo_embedding)
         return response_emo, response_mood 
 
 # ======== RoBERTa ========
