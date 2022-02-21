@@ -16,6 +16,7 @@ class Dense(nn.Module):
         self.out_proj = nn.Linear(hidden_size, output_size)
 
     def forward(self, x):
+        print(x.shape)
         # x = self.dropout(x)
         x = self.dense(x)
         x = torch.tanh(x)
@@ -47,7 +48,7 @@ class Emo_Generation(BertPreTrainedModel):
         bert_hidden    = bert_outputs[1]
 
         
-        response_mood  = self.mood_dense(init_mood)
+        response_mood  = self.mood_dense(init_mood.view(-1,1))
 
         emo_embedding  = torch.cat((self.mood_to_hidden(response_mood), self.hidden_resize_2(bert_hidden)), 1) + self.personality_to_hidden(personality)
         response_emo   = self.classifier(emo_embedding)

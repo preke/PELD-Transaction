@@ -83,8 +83,8 @@ def load_data(args, DATA_PATH):
     init_mood     = moodencoder.fit_transform(init_mood)
     response_mood = moodencoder.fit_transform(response_mood)
 
-    print(init_mood[:5])
-    print(response_mood[:5])
+    # print(init_mood[:5])
+    # print(response_mood[:5])
     
     # init_mood     = [Mood_dict[i] for i in init_mood]
     # response_mood = [Mood_dict[i] for i in response_mood]
