@@ -76,14 +76,23 @@ def load_data(args, DATA_PATH):
     
     init_mood     = df['Mood_1']
     response_mood = df['Mood_3']
-    init_mood     = [Mood_dict[i] for i in init_mood]
-    response_mood = [Mood_dict[i] for i in response_mood]
     
-    label        = df['Emotion_3']
     from sklearn.preprocessing import LabelEncoder
-    labelencoder = LabelEncoder()
-    label_enc    = labelencoder.fit_transform(label)
-    labels       = label_enc
+    moodencoder  = LabelEncoder()
+
+    init_mood     = moodencoder.fit_transform(init_mood)
+    response_mood = moodencoder.fit_transform(response_mood)
+
+    print(init_mood[:5])
+    print(response_mood[:5])
+    
+    # init_mood     = [Mood_dict[i] for i in init_mood]
+    # response_mood = [Mood_dict[i] for i in response_mood]
+
+    labelencoder  = LabelEncoder()
+    label         = df['Emotion_3']
+    label_enc     = labelencoder.fit_transform(label)
+    labels        = label_enc
     
     if args.base == 'RoBERTa':
         tokenizer  = RobertaTokenizer.from_pretrained("roberta-base", do_lower_case=True)
