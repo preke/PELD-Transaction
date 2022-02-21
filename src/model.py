@@ -16,7 +16,7 @@ class Dense(nn.Module):
         self.out_proj = nn.Linear(hidden_size, output_size)
 
     def forward(self, x):
-        print(x.shape)
+        # print(x.shape)
         # x = self.dropout(x)
         x = self.dense(x)
         x = torch.tanh(x)
