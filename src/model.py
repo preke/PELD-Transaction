@@ -50,7 +50,7 @@ class Emo_Generation(BertPreTrainedModel):
         bert_hidden    = bert_outputs[1]
 
         ## 0.2449415231433853
-        mood_v = self.mood_expand(init_mood.view(-1,1).float()) +  self.hidden_resize_1(bert_hidden)
+        mood_v = self.mood_expand(init_mood.view(-1,1).float()) +  self.hidden_resize_1(bert_hidden)#*personality
         response_mood  = self.mood_dense(mood_v)
 
 
