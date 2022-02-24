@@ -11,12 +11,12 @@ import model
 
 
 # CONFIG
-DATA_PATH = '../Dyadic_PELD_cleanned.tsv'
+DATA_PATH = '../Dyadic_PELD.tsv'
 
 parser = argparse.ArgumentParser(description='')
 args = parser.parse_args()
 
-args.device        = 0
+args.device        = 1
 args.base          = 'BERT'
 
 args.MAX_LEN       = 128 
