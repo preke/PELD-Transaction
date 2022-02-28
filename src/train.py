@@ -237,45 +237,44 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0):
     labels_list = np.array([])
     test_batch  = []
     tokenizer   =  BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
-    for batch in test_dataloader:
-        
-        batch = tuple(t.cuda(args.device) for t in batch)
-        b_input_ids, b_input_ids_2, b_input_ids_3, b_attn_masks, b_attn_masks_2,\
-        b_uttr_vad, b_personality, \
-        b_init_emo, b_user_emo, b_response_emo, b_init_mood, b_response_mood, b_labels = batch
 
-        with torch.no_grad():
-          # Forward pass, calculate logit predictions
-          # logits, m_r, user_emo = model(b_input_ids_2, b_attn_masks_2, b_uttr_vad, b_personality, b_init_mood)
-            logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
-            # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
-        
-        mood_loss_fct = nn.CrossEntropyLoss() #nn.MSELoss()
-        emo_loss_fct  = nn.CrossEntropyLoss() 
-        user_loss_fct = nn.MSELoss()
-        # weight = torch.FloatTensor([0.6342, 5.9110, 0.8695, 0.5490, 0.4640, 0.8700, 0.7023]).cuda(1)
-        
-        
-        emo_loss      = emo_loss_fct(logits, b_labels)
-        mood_loss     = mood_loss_fct(m_r, b_response_mood)
-        # user_loss     = user_loss_fct(user_emo, b_user_emo)
-        loss          = emo_loss # + user_loss
+    with open('result_file.txt', 'w') as f:
+
+        for batch in test_dataloader:
             
-        logits        = logits.detach().to('cpu').numpy()
-        label_ids     = b_labels.to('cpu').numpy()                
-        pred_flat     = np.argmax(logits, axis=1).flatten()
-        labels_flat   = label_ids.flatten()
+            batch = tuple(t.cuda(args.device) for t in batch)
+            b_input_ids, b_input_ids_2, b_input_ids_3, b_attn_masks, b_attn_masks_2,\
+            b_uttr_vad, b_personality, \
+            b_init_emo, b_user_emo, b_response_emo, b_init_mood, b_response_mood, b_labels = batch
+
+            with torch.no_grad():
+              # Forward pass, calculate logit predictions
+              # logits, m_r, user_emo = model(b_input_ids_2, b_attn_masks_2, b_uttr_vad, b_personality, b_init_mood)
+                logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
+                # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
             
-        pred_list     = np.append(pred_list, pred_flat)
-        labels_list   = np.append(labels_list, labels_flat)
+            mood_loss_fct = nn.CrossEntropyLoss() #nn.MSELoss()
+            emo_loss_fct  = nn.CrossEntropyLoss() 
+            user_loss_fct = nn.MSELoss()
+            # weight = torch.FloatTensor([0.6342, 5.9110, 0.8695, 0.5490, 0.4640, 0.8700, 0.7023]).cuda(1)
+            
+            
+            emo_loss      = emo_loss_fct(logits, b_labels)
+            mood_loss     = mood_loss_fct(m_r, b_response_mood)
+            # user_loss     = user_loss_fct(user_emo, b_user_emo)
+            loss          = emo_loss # + user_loss
+                
+            logits        = logits.detach().to('cpu').numpy()
+            label_ids     = b_labels.to('cpu').numpy()                
+            pred_flat     = np.argmax(logits, axis=1).flatten()
+            labels_flat   = label_ids.flatten()
+                
+            pred_list     = np.append(pred_list, pred_flat)
+            labels_list   = np.append(labels_list, labels_flat)
 
-        print(tokenizer.decode(b_input_ids.squeeze()))
-        print(tokenizer.decode(b_input_ids_2.squeeze()))
-        print(tokenizer.decode(b_input_ids_3.squeeze()))
-        print(pred_list)
-        print(labels_list)
-
-
+            f.write(tokenizer.decode(b_input_ids.squeeze()))
+            f.write(tokenizer.decode(b_input_ids_3.squeeze()))
+            f.write(str(pred_flat) + " " + str(labels_flat) + '\n')
 
     print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
     result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
