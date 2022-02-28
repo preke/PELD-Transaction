@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from tqdm import tqdm, trange,tnrange,tqdm_notebook
+from transformers import BertTokenizer, BertConfig
 import random
 
 from utils import Emotion_dict
@@ -232,15 +233,17 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0):
     # Put model in evaluation mode to evaluate loss on the validation set
     model.eval()
     
-    pred_list = np.array([])
+    pred_list   = np.array([])
     labels_list = np.array([])
-    
+    test_batch  = []
+    tokenizer   =  BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
     for batch in test_dataloader:
+        
         batch = tuple(t.cuda(args.device) for t in batch)
         b_input_ids, b_input_ids_2, b_input_ids_3, b_attn_masks, b_attn_masks_2,\
         b_uttr_vad, b_personality, \
         b_init_emo, b_user_emo, b_response_emo, b_init_mood, b_response_mood, b_labels = batch
-            
+
         with torch.no_grad():
           # Forward pass, calculate logit predictions
           # logits, m_r, user_emo = model(b_input_ids_2, b_attn_masks_2, b_uttr_vad, b_personality, b_init_mood)
@@ -265,6 +268,14 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0):
             
         pred_list     = np.append(pred_list, pred_flat)
         labels_list   = np.append(labels_list, labels_flat)
+
+        print(tokenizer.decode(b_input_ids_2))
+        print(tokenizer.decode(b_input_ids_3))
+        print(pred_list)
+        print(labels_list)
+
+
+
     print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
     result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
     if result['macro avg']['f1-score'] > best_macro:

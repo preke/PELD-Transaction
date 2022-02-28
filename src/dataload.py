@@ -260,7 +260,7 @@ def load_data(args, DATA_PATH):
 
     test_data = TensorDataset(test_inputs, test_inputs_2, test_inputs_3, test_attn_masks, test_attn_masks_2, test_uttr_vad, test_personalities, test_init_emo, test_user_emo, test_response_emo, test_init_mood, test_response_mood, test_labels)
     test_sampler = RandomSampler(test_data)
-    test_dataloader = DataLoader(test_data, sampler=test_sampler, batch_size=args.batch_size)
+    test_dataloader = DataLoader(test_data, sampler=test_sampler, batch_size=1)
 
     return len(train_data), train_dataloader, valid_dataloader, test_dataloader
 
