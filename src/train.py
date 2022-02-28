@@ -269,8 +269,9 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0):
         pred_list     = np.append(pred_list, pred_flat)
         labels_list   = np.append(labels_list, labels_flat)
 
-        print(tokenizer.decode(b_input_ids_2))
-        print(tokenizer.decode(b_input_ids_3))
+        print(tokenizer.decode(b_input_ids.squeeze()))
+        print(tokenizer.decode(b_input_ids_2.squeeze()))
+        print(tokenizer.decode(b_input_ids_3.squeeze()))
         print(pred_list)
         print(labels_list)
 
