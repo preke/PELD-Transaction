@@ -270,9 +270,9 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0):
             pred_flat     = np.argmax(logits, axis=1).flatten()
             labels_flat   = label_ids.flatten()
 
-            b_response_mood = b_response_mood.detach().to('cpu').numpy()
-            mood_labels = m_r.to('cpu').numpy()
-            mood_pred = np.argmax(b_response_mood, axis=1).flatten()
+            m_r = m_r.detach().to('cpu').numpy()
+            mood_labels = b_response_mood.to('cpu').numpy()
+            mood_pred = np.argmax(m_r, axis=1).flatten()
             mood_labels = mood_labels.flatten()
                 
             pred_list     = np.append(pred_list, pred_flat)
