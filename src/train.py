@@ -261,20 +261,27 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0):
             
             emo_loss      = emo_loss_fct(logits, b_labels)
             mood_loss     = mood_loss_fct(m_r, b_response_mood)
-            # user_loss     = user_loss_fct(user_emo, b_user_emo)
-            loss          = emo_loss # + user_loss
+
+
+            loss          = emo_loss 
                 
             logits        = logits.detach().to('cpu').numpy()
             label_ids     = b_labels.to('cpu').numpy()                
             pred_flat     = np.argmax(logits, axis=1).flatten()
             labels_flat   = label_ids.flatten()
+
+            b_response_mood = b_response_mood.detach().to('cpu').numpy()
+            mood_labels = m_r.to('cpu').numpy()
+            mood_pred = np.argmax(b_response_mood, axis=1).flatten()
+            mood_labels = mood_labels.flatten()
                 
             pred_list     = np.append(pred_list, pred_flat)
             labels_list   = np.append(labels_list, labels_flat)
 
-            f.write(tokenizer.decode(b_input_ids.squeeze()))
-            f.write(tokenizer.decode(b_input_ids_3.squeeze()))
-            f.write(str(pred_flat) + " " + str(labels_flat) + '\n')
+            f.write(tokenizer.decode(b_input_ids.squeeze()) + '\t')
+            f.write(tokenizer.decode(b_input_ids_3.squeeze())+ '\t')
+            f.write(str(mood_pred) + "\t" + str(mood_labels) + '\t')
+            f.write(str(pred_flat) + "\t" + str(labels_flat) + '\n')
 
     print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
     result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
