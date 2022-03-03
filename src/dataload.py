@@ -77,17 +77,19 @@ def load_data(args, DATA_PATH):
     init_mood     = df['Mood_1']
     response_mood = df['Mood_3']
     
+    # discrete label
+    
+    '''
     from sklearn.preprocessing import LabelEncoder
     moodencoder  = LabelEncoder()
 
     init_mood     = moodencoder.fit_transform(init_mood)
     response_mood = moodencoder.fit_transform(response_mood)
-
-    # print(init_mood[:5])
-    # print(response_mood[:5])
+    '''
     
-    # init_mood     = [Mood_dict[i] for i in init_mood]
-    # response_mood = [Mood_dict[i] for i in response_mood]
+    # one-hot vector
+    init_mood     = [Mood_dict[i] for i in init_mood]
+    response_mood = [Mood_dict[i] for i in response_mood]
 
     labelencoder  = LabelEncoder()
     label         = df['Emotion_3']
@@ -99,7 +101,7 @@ def load_data(args, DATA_PATH):
     elif args.base == 'BERT':
         tokenizer = BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
         
-    input_ids = [tokenizer.encode(sent, add_special_tokens=True, max_length=args.MAX_LEN,pad_to_max_length=True) for sent in uttr_input]
+    input_ids   = [tokenizer.encode(sent, add_special_tokens=True, max_length=args.MAX_LEN,pad_to_max_length=True) for sent in uttr_input]
     input_ids_2 = [tokenizer.encode(sent, add_special_tokens=True, max_length=args.MAX_LEN,pad_to_max_length=True) for sent in Utterance_2]
     input_ids_3 = [tokenizer.encode(sent, add_special_tokens=True, max_length=args.MAX_LEN,pad_to_max_length=True) for sent in Utterance_3]
     
