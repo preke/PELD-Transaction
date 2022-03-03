@@ -30,7 +30,7 @@ class Emo_Generation(BertPreTrainedModel):
         super().__init__(config)
         self.num_labels = 7
         self.bert = BertModel(config)
-        self.mid_size = 512
+        self.mid_size = 256
 
 
         self.mood_dense = Dense(self.mid_size+3, config.hidden_size, 3)
@@ -56,9 +56,9 @@ class Emo_Generation(BertPreTrainedModel):
 
         delta_mood = torch.cat((uttr_vad, self.hidden_resize(bert_hidden)), 1) 
 
-        response_mood  = F.softmax(self.mood_dense(delta_mood)) + init_mood#*5 # scaling by 5
+        response_mood  = F.softmax(self.mood_dense(delta_mood)) + init_mood
         emo_embedding  = torch.cat((self.mood_to_hidden(response_mood), self.hidden_resize_2(bert_hidden),  self.personality_to_hidden(personality)), 1)
-        response_emo   = F.softmax(self.classifier(emo_embedding))
+        response_emo   = self.classifier(emo_embedding)
         return response_emo, response_mood 
 
 # ======== RoBERTa ========
