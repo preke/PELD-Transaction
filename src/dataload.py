@@ -91,6 +91,7 @@ def load_data(args, DATA_PATH):
     init_mood     = [Mood_dict[i] for i in init_mood]
     response_mood = [Mood_dict[i] for i in response_mood]
 
+    from sklearn.preprocessing import LabelEncoder
     labelencoder  = LabelEncoder()
     label         = df['Emotion_3']
     label_enc     = labelencoder.fit_transform(label)
