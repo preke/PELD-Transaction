@@ -11,6 +11,13 @@ Emotion_dict = {
     'surprise': [0.40, 0.67, -0.13]
 }
 
+'''
+0 --> M1
+3 --> Neutral
+2 --> M3
+1 --> M2
+'''
+
 
 # Mood_dict = {
 #     'neutral': [0.0, 0.0, 0.0],

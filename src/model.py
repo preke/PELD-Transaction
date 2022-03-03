@@ -31,6 +31,7 @@ class Emo_Generation(BertPreTrainedModel):
         self.num_labels = 7
         self.mid_size = int(config.hidden_size * 0.5)
         self.bert = BertModel(config)
+        self.mid_size = 32
         self.mood_dense = Dense(4, config.hidden_size, 4)
         self.mood_expand = Dense(1, config.hidden_size, 4)
         self.mood_to_hidden = Dense(4, config.hidden_size, self.mid_size)
@@ -48,9 +49,11 @@ class Emo_Generation(BertPreTrainedModel):
         
         bert_outputs   = self.bert(input_ids, attention_mask=attn_masks)
         bert_hidden    = bert_outputs[1]
+        print(uttr_vad.shape)
+        
+        mood_v = torch.cat((init_mood.view(-1,1).float(), uttr_vad, bert_hidden), 1)
+        # mood_v = self.mood_expand(init_mood.view(-1,1).float()) +  self.hidden_resize_1(bert_hidden) #*personality
 
-        ## 0.2449415231433853
-        mood_v = self.mood_expand(init_mood.view(-1,1).float()) +  self.hidden_resize_1(bert_hidden) #*personality
         response_mood  = self.mood_dense(mood_v)
 
 
