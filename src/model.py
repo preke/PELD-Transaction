@@ -29,23 +29,22 @@ class Emo_Generation(BertPreTrainedModel):
     def __init__(self, config):
         super().__init__(config)
         self.num_labels = 7
-        self.mid_size = int(config.hidden_size * 0.5)
         self.bert = BertModel(config)
-        self.mid_size = 32
+        self.mid_size = 16
 
 
         self.mood_dense = Dense(20, config.hidden_size, 4)
         self.mood_expand = Dense(1, config.hidden_size, 4)
         self.mood_to_hidden = Dense(4, config.hidden_size, self.mid_size)
 
-        self.hidden_resize = Dense(config.hidden_size, config.hidden_size, 16)
+        self.hidden_resize = Dense(config.hidden_size, config.hidden_size, self.mid_size)
         self.hidden_resize_2 = Dense(config.hidden_size, config.hidden_size, self.mid_size)
 
-        self.personality_to_hidden = nn.Linear(3, config.hidden_size)
+        self.personality_to_hidden = nn.Linear(3, self.mid_size)
 
         self.hidden_to_vad = Dense(config.hidden_size, config.hidden_size, 3)
 
-        self.classifier = nn.Linear(config.hidden_size*2, 7)
+        self.classifier = nn.Linear(config.hidden_size*3, 7)
 
     def forward(self, input_ids, attn_masks, uttr_vad, personality, init_mood):
         
@@ -57,7 +56,7 @@ class Emo_Generation(BertPreTrainedModel):
         # bert_hidden: batch_size * 32
         mood_v = torch.cat((init_mood.view(-1,1).float(), uttr_vad, self.hidden_resize(bert_hidden)), 1) # 1 + 3 + 16
         response_mood  = self.mood_dense(mood_v)
-        
+
         emo_embedding  = torch.cat((self.mood_to_hidden(response_mood), self.hidden_resize_2(bert_hidden),  self.personality_to_hidden(personality)), 1)
         response_emo   = self.classifier(emo_embedding)
         return response_emo, response_mood 
