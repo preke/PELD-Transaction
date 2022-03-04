@@ -30,7 +30,7 @@ class Emo_Generation(BertPreTrainedModel):
         super().__init__(config)
         self.num_labels = 7
         self.bert = BertModel(config)
-        self.mid_size = 768
+        self.mid_size = 1024
 
 
         self.mood_dense = Dense(self.mid_size+3, config.hidden_size, 3)
