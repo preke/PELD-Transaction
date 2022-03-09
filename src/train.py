@@ -11,7 +11,7 @@ import torch.nn.functional as F
 from tqdm import tqdm, trange,tnrange,tqdm_notebook
 from transformers import BertTokenizer, BertConfig
 import random
-
+import shutil
 from utils import Emotion_dict
 
 def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader):
@@ -42,6 +42,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
     loss_list = []
     
     best_macro = 0.0
+    best_epoch = 0
     model.zero_grad()
 
     for _ in tnrange(1, args.epochs+1, desc='Epoch'):
@@ -81,7 +82,6 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             # user_loss     = user_loss_fct(user_emo, b_user_emo)
             loss          = emo_loss + mood_loss*1.0 # + user_loss
                         
-
             
             logits        = logits.detach().to('cpu').numpy()
             label_ids     = b_labels.to('cpu').numpy()                
@@ -146,7 +146,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         
 
         valid_logs = eval_model(model, valid_dataloader, args, valid_logs)
-        test_logs, pred_list, best_macro  = test_model(model, test_dataloader, args, test_logs, best_macro)
+        test_logs, pred_list, best_macro, best_epoch = test_model(model, test_dataloader, args, test_logs, best_macro, _)
         print('Current best macro is ', best_macro)
         print('loss list', loss_list)
         print('mood loss list', mood_loss_list)
@@ -227,7 +227,7 @@ def eval_model(model, valid_dataloader, args, valid_logs):
     return valid_logs
 
 
-def test_model(model, test_dataloader, args, test_logs, best_macro=0.0):
+def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, epoch=0):
     # Test
 
     # Put model in evaluation mode to evaluate loss on the validation set
@@ -258,10 +258,8 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0):
             user_loss_fct = nn.MSELoss()
             # weight = torch.FloatTensor([0.6342, 5.9110, 0.8695, 0.5490, 0.4640, 0.8700, 0.7023]).cuda(1)
             
-            
             emo_loss      = emo_loss_fct(logits, b_labels)
             mood_loss     = mood_loss_fct(m_r, b_response_mood)
-
 
             loss          = emo_loss 
                 
@@ -287,6 +285,10 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0):
     result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
     if result['macro avg']['f1-score'] > best_macro:
         best_macro = result['macro avg']['f1-score']
+        best_epoch = epoch
+        shutil.copyfile('result_file.txt', 'best_result.txt')
+
+
     for key in result.keys():
         if key !='accuracy':
             test_logs.append([

@@ -50,9 +50,7 @@ class Emo_Generation(BertPreTrainedModel):
         bert_outputs   = self.bert(input_ids, attention_mask=attn_masks)
         bert_hidden    = bert_outputs[1]
         
-        # uttr_vad: batch_size * 3
-        # init_mood: batch_size * 1
-        # bert_hidden: batch_size * 32
+        
 
         delta_mood = torch.cat((uttr_vad, self.hidden_resize(bert_hidden)), 1) 
 
