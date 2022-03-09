@@ -155,8 +155,6 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
     df_valid_logs = pd.DataFrame(valid_logs, columns=['precision', 'recall', 'f1-score', 'support']).add_prefix('valid_')
     df_test_logs  = pd.DataFrame(test_logs, columns=['precision', 'recall', 'f1-score', 'support']).add_prefix('test_')
 
-
-
     df_all = pd.concat([df_train_logs, df_valid_logs, df_test_logs], axis=1)
     df_all.to_csv(args.result_name, index=False)
 
@@ -297,7 +295,10 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, epoch=0)
                     result[key]['f1-score'], 
                     result[key]['support'] 
                 ])
-    return test_logs, pred_list, best_macro
+    return test_logs, pred_list, best_macro, best_epoch
+
+
+    
 
 
 
