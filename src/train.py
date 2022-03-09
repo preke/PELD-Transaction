@@ -146,7 +146,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         
 
         valid_logs = eval_model(model, valid_dataloader, args, valid_logs)
-        test_logs, pred_list, best_macro, best_epoch = test_model(model, test_dataloader, args, test_logs, best_macro, _)
+        test_logs, pred_list, best_macro, best_epoch = test_model(model, test_dataloader, args, test_logs, best_macro, best_epoch, _)
         print('Current best macro is ', best_macro)
         print('loss list', loss_list)
         print('mood loss list', mood_loss_list)
@@ -225,7 +225,7 @@ def eval_model(model, valid_dataloader, args, valid_logs):
     return valid_logs
 
 
-def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, epoch=0):
+def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epoch=0, epoch=0):
     # Test
 
     # Put model in evaluation mode to evaluate loss on the validation set
@@ -298,7 +298,7 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, epoch=0)
     return test_logs, pred_list, best_macro, best_epoch
 
 
-    
+
 
 
 
