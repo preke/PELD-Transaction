@@ -258,6 +258,15 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
             user_loss_fct = nn.MSELoss()
             # weight = torch.FloatTensor([0.6342, 5.9110, 0.8695, 0.5490, 0.4640, 0.8700, 0.7023]).cuda(1)
             
+
+            import time
+            print(logits)
+            print(b_labels)
+            print("*"*10)
+            print(m_r)
+            print(b_response_mood)
+            time.sleep(5)
+
             emo_loss      = emo_loss_fct(logits, b_labels)
             mood_loss     = mood_loss_fct(m_r, b_response_mood)
 
@@ -273,10 +282,7 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
             mood_pred = np.argmax(m_r, axis=1).flatten()
             mood_labels = mood_labels.flatten()
 
-            import time
-            print(m_r)
-            print(mood_labels)
-            time.sleep(5)
+
                 
             pred_list     = np.append(pred_list, pred_flat)
             labels_list   = np.append(labels_list, labels_flat)
