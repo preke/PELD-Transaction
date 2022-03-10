@@ -272,6 +272,11 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
             mood_labels = b_response_mood.to('cpu').numpy()
             mood_pred = np.argmax(m_r, axis=1).flatten()
             mood_labels = mood_labels.flatten()
+
+            import time
+            print(m_r)
+            print(mood_labels)
+            time.sleep(5)
                 
             pred_list     = np.append(pred_list, pred_flat)
             labels_list   = np.append(labels_list, labels_flat)
