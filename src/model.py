@@ -50,6 +50,7 @@ class Emo_Generation(BertPreTrainedModel):
         bert_outputs   = self.bert(input_ids, attention_mask=attn_masks)
         bert_hidden    = bert_outputs[1]
         
+        print(init_mood)
         
 
         delta_mood = torch.cat((uttr_vad, self.hidden_resize(bert_hidden)), 1) 
