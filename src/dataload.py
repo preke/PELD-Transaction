@@ -69,7 +69,7 @@ def load_data(args, DATA_PATH):
     init_emo     = df['Emotion_1']
     user_emo     = df['Emotion_2']
     response_emo = df['Emotion_3']
-    
+
     init_emo     = [Emotion_dict[i] for i in init_emo]
     user_emo     = [Emotion_dict[i] for i in user_emo]    
     response_emo = [Emotion_dict[i] for i in response_emo]
@@ -80,8 +80,8 @@ def load_data(args, DATA_PATH):
     
     # discrete label
     
-    # from sklearn.preprocessing import LabelEncoder
-    # moodencoder  = LabelEncoder()
+    from sklearn.preprocessing import LabelEncoder
+    moodencoder  = LabelEncoder()
 
     # response_mood = moodencoder.fit_transform(response_mood)
     
@@ -89,6 +89,7 @@ def load_data(args, DATA_PATH):
     # one-hot vector
     init_mood     = [Mood_dict[i] for i in init_mood]
     response_mood = [Mood_dict[i] for i in response_mood]
+    response_mood = moodencoder.fit_transform(response_mood)
 
     from sklearn.preprocessing import LabelEncoder
     labelencoder  = LabelEncoder()
