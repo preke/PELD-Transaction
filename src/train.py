@@ -286,7 +286,7 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
     if result['macro avg']['f1-score'] > best_macro:
         best_macro = result['macro avg']['f1-score']
         best_epoch = epoch
-        shutil.copyfile('result_file.txt', 'msg_best_result.txt')
+        shutil.copyfile('result_file.txt', 'best_result.txt')
 
 
     for key in result.keys():
