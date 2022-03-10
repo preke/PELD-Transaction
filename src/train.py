@@ -68,7 +68,6 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
             # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
             
-            print(logits)
             
             
             mood_loss_fct = nn.CrossEntropyLoss()# nn.MSELoss()
