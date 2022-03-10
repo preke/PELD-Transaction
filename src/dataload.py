@@ -80,15 +80,15 @@ def load_data(args, DATA_PATH):
     # discrete label
     
     
-    from sklearn.preprocessing import LabelEncoder
-    moodencoder  = LabelEncoder()
+    # from sklearn.preprocessing import LabelEncoder
+    # moodencoder  = LabelEncoder()
 
-    response_mood = moodencoder.fit_transform(response_mood)
+    # response_mood = moodencoder.fit_transform(response_mood)
     
     
     # one-hot vector
     init_mood     = [Mood_dict[i] for i in init_mood]
-    # response_mood = [Mood_dict[i] for i in response_mood]
+    response_mood = [Mood_dict[i] for i in response_mood]
 
     from sklearn.preprocessing import LabelEncoder
     labelencoder  = LabelEncoder()
