@@ -237,7 +237,7 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
     test_batch  = []
     tokenizer   =  BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
 
-    with open('result_file.txt', 'w') as f:
+    with open('ont_hot_result_file.txt', 'w') as f:
 
         for batch in test_dataloader:
             
@@ -286,7 +286,7 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
     if result['macro avg']['f1-score'] > best_macro:
         best_macro = result['macro avg']['f1-score']
         best_epoch = epoch
-        shutil.copyfile('result_file.txt', 'best_result.txt')
+        shutil.copyfile('ont_hot_result_file.txt', 'one_hot_best_result.txt')
 
 
     for key in result.keys():
