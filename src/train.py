@@ -70,7 +70,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
             
             
-            mood_loss_fct = nn.MSELoss() # nn.CrossEntropyLoss()
+            mood_loss_fct = nn.CrossEntropyLoss()
             emo_loss_fct  = nn.CrossEntropyLoss()
             user_loss_fct = nn.MSELoss()
             # weight = torch.FloatTensor([0.6342, 5.9110, 0.8695, 0.5490, 0.4640, 0.8700, 0.7023]).cuda(1)
@@ -194,7 +194,7 @@ def eval_model(model, valid_dataloader, args, valid_logs):
           # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
         
         # mood_loss_fct = nn.CrossEntropyLoss() #nn.MSELoss()
-        mood_loss_fct = nn.MSELoss() # nn.CrossEntropyLoss()
+        mood_loss_fct = nn.CrossEntropyLoss()
         emo_loss_fct  = nn.CrossEntropyLoss() 
         user_loss_fct = nn.MSELoss()
         # weight = torch.FloatTensor([0.6342, 5.9110, 0.8695, 0.5490, 0.4640, 0.8700, 0.7023]).cuda(1)
@@ -253,7 +253,7 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
                 # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
             
             # mood_loss_fct = nn.CrossEntropyLoss() #nn.MSELoss()
-            mood_loss_fct = nn.MSELoss() # nn.CrossEntropyLoss()
+            mood_loss_fct = nn.CrossEntropyLoss()
             emo_loss_fct  = nn.CrossEntropyLoss() 
             user_loss_fct = nn.MSELoss()
             # weight = torch.FloatTensor([0.6342, 5.9110, 0.8695, 0.5490, 0.4640, 0.8700, 0.7023]).cuda(1)
@@ -297,6 +297,7 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
                     result[key]['f1-score'], 
                     result[key]['support'] 
                 ])
+    
     return test_logs, pred_list, best_macro, best_epoch
 
 
