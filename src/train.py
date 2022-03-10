@@ -79,6 +79,10 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
 
             emo_loss      = emo_loss_fct(logits, b_labels)
             mood_loss     = mood_loss_fct(m_r, b_response_mood)
+
+            print(emo_loss)
+            print(mood_loss)
+
             # user_loss     = user_loss_fct(user_emo, b_user_emo)
             loss          = emo_loss + mood_loss*1.0 # + user_loss
                  
