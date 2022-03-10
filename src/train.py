@@ -64,7 +64,6 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             b_uttr_vad, b_personality, \
             b_init_emo, b_user_emo, b_response_emo, b_init_mood, b_response_mood, b_labels = batch
             
-            print(b_response_mood)
 
             # logits, m_r, user_emo = model(b_input_ids_2, b_attn_masks_2, b_uttr_vad, b_personality, b_init_mood)
             logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
