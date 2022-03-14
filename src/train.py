@@ -40,7 +40,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         print("<" + "="*22 + F" Epoch {_} "+ "="*22 + ">")
         # Calculate total loss for this epoch
         batch_loss = 0
-        mood_batch_vad_loss = 0
+        mood_batch_mse_loss = 0
         mood_batch_cls_loss = 0
         
         train_accuracy, nb_train_steps = 0, 0
