@@ -19,17 +19,6 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
     num_warmup_steps = 0
     num_training_steps = len(train_dataloader)*args.epochs
     
-    
-    # for name, param in model.named_parameters(): 
-    #     if name.startswith('bert'):
-    #         param.requires_grad = False
-    #     else:
-    #         print(name,param.size())
-    #     if name.startswith('bert.pooler') or name.startswith('bert.encoder.layer.10') or name.startswith('bert.encoder.layer.11'):
-    #         param.requires_grad = True
-    #         print(name, param.size())
-  
-    
             
     optimizer = AdamW(filter(lambda p: p.requires_grad, model.parameters()), lr=args.lr, eps=args.adam_epsilon, correct_bias=False)  # To reproduce BertAdam specific behavior set correct_bias=False
     scheduler = get_linear_schedule_with_warmup(optimizer, num_warmup_steps=num_warmup_steps, num_training_steps=num_training_steps)  # PyTorch scheduler
@@ -38,7 +27,9 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
     valid_logs = []
     test_logs  = []
 
-    mood_loss_list = []
+    mood_cls_loss_list = []
+    mood_mse_loss_list = []
+
     loss_list = []
     
     best_macro = 0.0
@@ -49,7 +40,8 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         print("<" + "="*22 + F" Epoch {_} "+ "="*22 + ">")
         # Calculate total loss for this epoch
         batch_loss = 0
-        mood_batch_loss = 0
+        mood_batch_vad_loss = 0
+        mood_batch_cls_loss = 0
         
         train_accuracy, nb_train_steps = 0, 0
         
@@ -64,40 +56,36 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             model.train()
             batch = tuple(t.cuda(args.device) for t in batch)
             b_input_ids, b_input_ids_2, b_input_ids_3, b_attn_masks, b_attn_masks_2,\
-            b_uttr_vad, b_personality, \
-            b_init_emo, b_user_emo, b_response_emo, b_init_mood, b_response_mood, b_labels = batch
+            b_uttr_vad, b_personality, b_init_emo, b_user_emo, b_response_emo, \
+            b_init_mood, b_response_mood_vad, b_response_mood_label, b_labels = batch
             
+            response_mood_vad, response_mood_logits, response_emo = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
+            
+            mood_mse_lf  = nn.MSELoss()
+            mood_cls_lf  = nn.CrossEntropyLoss()
+            emo_loss_fct = nn.CrossEntropyLoss()
 
-            # logits, m_r, user_emo = model(b_input_ids_2, b_attn_masks_2, b_uttr_vad, b_personality, b_init_mood)
-            logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
-            # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
+            emo_loss      = emo_loss_fct(response_emo, b_labels)
+            mood_mse_loss = mood_mse_lf(torch.sign(response_mood_vad), b_response_mood_vad)
+            mood_cls_loss = mood_cls_lf(response_mood_logits, b_response_mood_label)
             
             
-            mood_loss_fct = nn.CrossEntropyLoss()
-            emo_loss_fct  = nn.CrossEntropyLoss()
-            user_loss_fct = nn.MSELoss()
-            # weight = torch.FloatTensor([0.6342, 5.9110, 0.8695, 0.5490, 0.4640, 0.8700, 0.7023]).cuda(1)
-
-
-            emo_loss      = emo_loss_fct(logits, b_labels)
-            mood_loss     = mood_loss_fct(m_r, b_response_mood)
-
-            # user_loss     = user_loss_fct(user_emo, b_user_emo)
-            loss          = mood_loss # emo_loss + mood_loss # + user_loss
+            loss          = mood_mse_loss + mood_cls_loss 
             
-            logits        = logits.detach().to('cpu').numpy()
-            label_ids     = b_labels.to('cpu').numpy()                
-            pred_flat     = np.argmax(logits, axis=1).flatten()
-            labels_flat   = label_ids.flatten()
+            
+            response_emo         = response_emo.detach().to('cpu').numpy()
+            label_ids            = b_labels.to('cpu').numpy()                
+            pred_flat            = np.argmax(response_emo, axis=1).flatten()
+            labels_flat          = label_ids.flatten()
 
-            m_r = m_r.detach().to('cpu').numpy()
-            mood_labels = b_response_mood.to('cpu').numpy()
-            mood_pred = np.argmax(m_r, axis=1).flatten()
-            mood_labels = mood_labels.flatten()
+            response_mood_logits = response_mood_logits.detach().to('cpu').numpy()
+            mood_labels          = b_response_mood_label.to('cpu').numpy()
+            mood_pred            = np.argmax(response_mood_logits, axis=1).flatten()
+            mood_labels          = mood_labels.flatten()
 
 
-            pred_list     = np.append(pred_list, pred_flat)
-            labels_list   = np.append(labels_list, labels_flat)
+            pred_list        = np.append(pred_list, pred_flat)
+            labels_list      = np.append(labels_list, labels_flat)
 
             pred_mood_list   = np.append(pred_mood_list, mood_pred)
             mood_labels_list = np.append(mood_labels_list, mood_labels)
@@ -118,20 +106,25 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             optimizer.zero_grad()
             # Update tracking variables
             batch_loss += loss.item()
-            mood_batch_loss += mood_loss.item()
+            mood_batch_mse_loss += mood_mse_loss.item()
+            mood_batch_cls_loss += mood_cls_loss.item()
       
         #  Calculate the average loss over the training data.
         avg_train_loss = batch_loss / len(train_dataloader)
-        avg_mood_batch_loss = mood_batch_loss / len(train_dataloader)
+        
+        avg_mood_mse_loss = mood_batch_mse_loss / len(train_dataloader)
+        avg_mood_cls_loss = mood_batch_cls_loss / len(train_dataloader)
 
         #store the current learning rate
         for param_group in optimizer.param_groups:
             print("\n\tCurrent Learning rate: ",param_group['lr'])
 
-        print("\n\tCurrent overall loss: ", avg_train_loss)
-        print("\n\tCurrent mood loss: ", avg_mood_batch_loss)
+        # print("\n\tCurrent overall loss: ", avg_train_loss)
+        print("\n\tCurrent mood cls loss: ", avg_mood_cls_loss)
+        print("\n\tCurrent mood mse loss: ", avg_mood_mse_loss)
 
-        mood_loss_list.append(avg_mood_batch_loss)
+        mood_mse_loss_list.append(mood_batch_mse_loss)
+        mood_cls_loss_list.append(mood_batch_cls_loss)
         loss_list.append(avg_train_loss)
         
         
@@ -198,46 +191,44 @@ def eval_model(model, valid_dataloader, args, valid_logs):
     pred_list = np.array([])
     labels_list = np.array([])
 
+
     pred_mood_list   = np.array([])
     mood_labels_list = np.array([])
     
     for batch in valid_dataloader:
         batch = tuple(t.cuda(args.device) for t in batch)
         b_input_ids, b_input_ids_2, b_input_ids_3, b_attn_masks, b_attn_masks_2,\
-        b_uttr_vad, b_personality, \
-        b_init_emo, b_user_emo, b_response_emo, b_init_mood, b_response_mood, b_labels = batch
-            
+        b_uttr_vad, b_personality, b_init_emo, b_user_emo, b_response_emo, \
+        b_init_mood, b_response_mood_vad, b_response_mood_label, b_labels = batch
+        
         with torch.no_grad():
-          # Forward pass, calculate logit predictions
-          # logits, m_r, user_emo = model(b_input_ids_2, b_attn_masks_2, b_uttr_vad, b_personality, b_init_mood)
-          logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
-          # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
+            response_mood_vad, response_mood_logits, response_emo = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
         
-        # mood_loss_fct = nn.CrossEntropyLoss() #nn.MSELoss()
-        mood_loss_fct = nn.CrossEntropyLoss()
-        emo_loss_fct  = nn.CrossEntropyLoss() 
-        user_loss_fct = nn.MSELoss()
-        # weight = torch.FloatTensor([0.6342, 5.9110, 0.8695, 0.5490, 0.4640, 0.8700, 0.7023]).cuda(1)
+        mood_mse_lf  = nn.MSELoss()
+        mood_cls_lf  = nn.CrossEntropyLoss()
+        emo_loss_fct = nn.CrossEntropyLoss()
+
+        emo_loss      = emo_loss_fct(response_emo, b_labels)
+        mood_mse_loss = mood_mse_lf(torch.sign(response_mood_vad), b_response_mood_vad)
+        mood_cls_loss = mood_cls_lf(response_mood_logits, b_response_mood_label)
         
         
-        emo_loss      = emo_loss_fct(logits, b_labels)
-        mood_loss     = mood_loss_fct(m_r, b_response_mood)
-        # user_loss     = user_loss_fct(user_emo, b_user_emo)
-        loss          = mood_loss # emo_loss # + user_loss
-            
-        logits        = logits.detach().to('cpu').numpy()
-        label_ids     = b_labels.to('cpu').numpy()                
-        pred_flat     = np.argmax(logits, axis=1).flatten()
-        labels_flat   = label_ids.flatten()
-            
-        m_r = m_r.detach().to('cpu').numpy()
-        mood_labels = b_response_mood.to('cpu').numpy()
-        mood_pred = np.argmax(m_r, axis=1).flatten()
-        mood_labels = mood_labels.flatten()
+        loss          = mood_mse_loss + mood_cls_loss 
+        
+        
+        response_emo         = response_emo.detach().to('cpu').numpy()
+        label_ids            = b_labels.to('cpu').numpy()                
+        pred_flat            = np.argmax(response_emo, axis=1).flatten()
+        labels_flat          = label_ids.flatten()
+
+        response_mood_logits = response_mood_logits.detach().to('cpu').numpy()
+        mood_labels          = b_response_mood_label.to('cpu').numpy()
+        mood_pred            = np.argmax(response_mood_logits, axis=1).flatten()
+        mood_labels          = mood_labels.flatten()
 
 
-        pred_list     = np.append(pred_list, pred_flat)
-        labels_list   = np.append(labels_list, labels_flat)
+        pred_list        = np.append(pred_list, pred_flat)
+        labels_list      = np.append(labels_list, labels_flat)
 
         pred_mood_list   = np.append(pred_mood_list, mood_pred)
         mood_labels_list = np.append(mood_labels_list, mood_labels)
@@ -277,44 +268,39 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
     tokenizer   =  BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
 
     for batch in test_dataloader:
-        
         batch = tuple(t.cuda(args.device) for t in batch)
         b_input_ids, b_input_ids_2, b_input_ids_3, b_attn_masks, b_attn_masks_2,\
-        b_uttr_vad, b_personality, \
-        b_init_emo, b_user_emo, b_response_emo, b_init_mood, b_response_mood, b_labels = batch
+        b_uttr_vad, b_personality, b_init_emo, b_user_emo, b_response_emo, \
+        b_init_mood, b_response_mood_vad, b_response_mood_label, b_labels = batch
 
         with torch.no_grad():
-          # Forward pass, calculate logit predictions
-          # logits, m_r, user_emo = model(b_input_ids_2, b_attn_masks_2, b_uttr_vad, b_personality, b_init_mood)
-            logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
-            # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
+            response_mood_vad, response_mood_logits, response_emo = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
         
-        # mood_loss_fct = nn.CrossEntropyLoss() #nn.MSELoss()
-        mood_loss_fct = nn.CrossEntropyLoss()
-        emo_loss_fct  = nn.CrossEntropyLoss() 
-        user_loss_fct = nn.MSELoss()
-        # weight = torch.FloatTensor([0.6342, 5.9110, 0.8695, 0.5490, 0.4640, 0.8700, 0.7023]).cuda(1)
+        mood_mse_lf  = nn.MSELoss()
+        mood_cls_lf  = nn.CrossEntropyLoss()
+        emo_loss_fct = nn.CrossEntropyLoss()
+
+        emo_loss      = emo_loss_fct(response_emo, b_labels)
+        mood_mse_loss = mood_mse_lf(torch.sign(response_mood_vad), b_response_mood_vad)
+        mood_cls_loss = mood_cls_lf(response_mood_logits, b_response_mood_label)
         
+        
+        loss          = mood_mse_loss + mood_cls_loss 
+        
+        
+        response_emo         = response_emo.detach().to('cpu').numpy()
+        label_ids            = b_labels.to('cpu').numpy()                
+        pred_flat            = np.argmax(response_emo, axis=1).flatten()
+        labels_flat          = label_ids.flatten()
 
-        emo_loss      = emo_loss_fct(logits, b_labels)
-        mood_loss     = mood_loss_fct(m_r, b_response_mood)
-
-        loss          = emo_loss 
-            
-        logits        = logits.detach().to('cpu').numpy()
-        label_ids     = b_labels.to('cpu').numpy()                
-        pred_flat     = np.argmax(logits, axis=1).flatten()
-        labels_flat   = label_ids.flatten()
-
-        m_r = m_r.detach().to('cpu').numpy()
-        mood_labels = b_response_mood.to('cpu').numpy()
-        mood_pred = np.argmax(m_r, axis=1).flatten()
-        mood_labels = mood_labels.flatten()
+        response_mood_logits = response_mood_logits.detach().to('cpu').numpy()
+        mood_labels          = b_response_mood_label.to('cpu').numpy()
+        mood_pred            = np.argmax(response_mood_logits, axis=1).flatten()
+        mood_labels          = mood_labels.flatten()
 
 
-            
-        pred_list     = np.append(pred_list, pred_flat)
-        labels_list   = np.append(labels_list, labels_flat)
+        pred_list        = np.append(pred_list, pred_flat)
+        labels_list      = np.append(labels_list, labels_flat)
 
         pred_mood_list   = np.append(pred_mood_list, mood_pred)
         mood_labels_list = np.append(mood_labels_list, mood_labels)

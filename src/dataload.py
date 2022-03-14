@@ -82,13 +82,11 @@ def load_data(args, DATA_PATH):
     
     from sklearn.preprocessing import LabelEncoder
     moodencoder  = LabelEncoder()
-
-    response_mood = moodencoder.fit_transform(response_mood)
+    response_mood_label = moodencoder.fit_transform(response_mood)
     
     
-    # one-hot vector
     init_mood     = [Mood_dict[i] for i in init_mood]
-    # response_mood = [Mood_dict[i] for i in response_mood]
+    response_mood_vad = [Mood_dict[i] for i in response_mood]
 
     from sklearn.preprocessing import LabelEncoder
     labelencoder  = LabelEncoder()
@@ -151,8 +149,12 @@ def load_data(args, DATA_PATH):
     
     train_init_mood, test_init_mood,_,_ = \
         train_test_split(init_mood, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
-    train_response_mood, test_response_mood,_,_ = \
-        train_test_split(response_mood, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
+    
+    train_response_mood_vad, test_response_mood,_,_ = \
+        train_test_split(response_mood_vad, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
+
+    train_response_mood_label, test_response_mood,_,_ = \
+        train_test_split(response_mood_label, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
     
     train_uttr_vad, test_uttr_vad,_,_ = \
         train_test_split(uttr_vad, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
@@ -189,8 +191,11 @@ def load_data(args, DATA_PATH):
     
     train_init_mood,valid_init_mood,_,_ = \
         train_test_split(train_init_mood, train_set_labels, random_state=args.SEED, test_size=0.1, stratify=train_set_labels)
-    train_response_mood,valid_response_mood,_,_ = \
-        train_test_split(train_response_mood, train_set_labels, random_state=args.SEED, test_size=0.1, stratify=train_set_labels)
+    train_response_mood_vad,valid_response_mood_vad,_,_ = \
+        train_test_split(train_response_mood_vad, train_set_labels, random_state=args.SEED, test_size=0.1, stratify=train_set_labels)
+
+    train_response_mood_label,valid_response_mood_label,_,_ = \
+        train_test_split(train_response_mood_label, train_set_labels, random_state=args.SEED, test_size=0.1, stratify=train_set_labels)
     
     train_uttr_vad, valid_uttr_vad,_,_ = \
         train_test_split(train_uttr_vad, train_set_labels, random_state=args.SEED, test_size=0.1, stratify=train_set_labels)
@@ -247,22 +252,26 @@ def load_data(args, DATA_PATH):
     valid_init_mood      = torch.tensor(valid_init_mood)
     test_init_mood       = torch.tensor(test_init_mood)
     
-    train_response_mood  = torch.tensor(train_response_mood)
-    valid_response_mood  = torch.tensor(valid_response_mood)
-    test_response_mood   = torch.tensor(test_response_mood)
+    train_response_mood_vad  = torch.tensor(train_response_mood_vad)
+    valid_response_mood_vad  = torch.tensor(valid_response_mood_vad)
+    test_response_mood_vad   = torch.tensor(test_response_mood_vad)
+
+    train_response_mood_label  = torch.tensor(train_response_mood_label)
+    valid_response_mood_label  = torch.tensor(valid_response_mood_label)
+    test_response_mood_label   = torch.tensor(test_response_mood_label)
     
 
-    train_data = TensorDataset(train_inputs, train_inputs_2, train_inputs_3, train_attn_masks, train_attn_masks_2, train_uttr_vad, train_personalities, train_init_emo, train_user_emo, train_response_emo, train_init_mood, train_response_mood, train_labels)
+    train_data = TensorDataset(train_inputs, train_inputs_2, train_inputs_3, train_attn_masks, train_attn_masks_2, train_uttr_vad, train_personalities, train_init_emo, train_user_emo, train_response_emo, train_init_mood, train_response_mood_vad, train_response_mood_label, train_labels)
     train_sampler = RandomSampler(train_data)
     train_dataloader = DataLoader(train_data, sampler=train_sampler, batch_size=args.batch_size)
 
-    valid_data = TensorDataset(valid_inputs, valid_inputs_2, valid_inputs_3, valid_attn_masks, valid_attn_masks_2, valid_uttr_vad, valid_personalities, valid_init_emo, valid_user_emo, valid_response_emo, valid_init_mood, valid_response_mood, valid_labels)
+    valid_data = TensorDataset(valid_inputs, valid_inputs_2, valid_inputs_3, valid_attn_masks, valid_attn_masks_2, valid_uttr_vad, valid_personalities, valid_init_emo, valid_user_emo, valid_response_emo, valid_init_mood, valid_response_mood_vad, valid_response_mood_label, valid_labels)
     valid_sampler = RandomSampler(valid_data)
     valid_dataloader = DataLoader(valid_data, sampler=valid_sampler, batch_size=args.batch_size)
 
-    test_data = TensorDataset(test_inputs, test_inputs_2, test_inputs_3, test_attn_masks, test_attn_masks_2, test_uttr_vad, test_personalities, test_init_emo, test_user_emo, test_response_emo, test_init_mood, test_response_mood, test_labels)
+    test_data = TensorDataset(test_inputs, test_inputs_2, test_inputs_3, test_attn_masks, test_attn_masks_2, test_uttr_vad, test_personalities, test_init_emo, test_user_emo, test_response_emo, test_init_mood, test_response_mood_vad, test_response_mood_label, test_labels)
     test_sampler = RandomSampler(test_data)
-    test_dataloader = DataLoader(test_data, sampler=test_sampler, batch_size=1)
+    test_dataloader = DataLoader(test_data, sampler=test_sampler, batch_size=args.batch_size)
 
     return len(train_data), train_dataloader, valid_dataloader, test_dataloader
 
