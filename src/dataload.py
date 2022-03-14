@@ -150,10 +150,10 @@ def load_data(args, DATA_PATH):
     train_init_mood, test_init_mood,_,_ = \
         train_test_split(init_mood, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
     
-    train_response_mood_vad, test_response_mood,_,_ = \
+    train_response_mood_vad, test_response_mood_vad,_,_ = \
         train_test_split(response_mood_vad, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
 
-    train_response_mood_label, test_response_mood,_,_ = \
+    train_response_mood_label, test_response_mood_label,_,_ = \
         train_test_split(response_mood_label, labels, random_state=args.SEED, test_size=0.1, stratify=labels)
     
     train_uttr_vad, test_uttr_vad,_,_ = \
