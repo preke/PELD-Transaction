@@ -55,6 +55,9 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         
         pred_list = np.array([])
         labels_list = np.array([])
+
+        pred_mood_list   = np.array([])
+        mood_labels_list = np.array([])
         
         for step, batch in enumerate(train_dataloader):
 
@@ -80,15 +83,24 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             mood_loss     = mood_loss_fct(m_r, b_response_mood)
 
             # user_loss     = user_loss_fct(user_emo, b_user_emo)
-            loss          = emo_loss + mood_loss*1.0 # + user_loss
+            loss          = mood_loss # emo_loss + mood_loss # + user_loss
             
             logits        = logits.detach().to('cpu').numpy()
             label_ids     = b_labels.to('cpu').numpy()                
             pred_flat     = np.argmax(logits, axis=1).flatten()
             labels_flat   = label_ids.flatten()
-            
+
+            m_r = m_r.detach().to('cpu').numpy()
+            mood_labels = b_response_mood.to('cpu').numpy()
+            mood_pred = np.argmax(m_r, axis=1).flatten()
+            mood_labels = mood_labels.flatten()
+
+
             pred_list     = np.append(pred_list, pred_flat)
             labels_list   = np.append(labels_list, labels_flat)
+
+            pred_mood_list   = np.append(pred_mood_list, mood_pred)
+            mood_labels_list = np.append(mood_labels_list, mood_labels)
             
             nb_train_steps += 1
 
@@ -122,8 +134,13 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         mood_loss_list.append(avg_mood_batch_loss)
         loss_list.append(avg_train_loss)
         
-        print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
-        result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
+        
+        print('Mood prediction\n')
+        # # print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
+        # # result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
+
+        print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
+        result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
         for key in result.keys():
             if key !='accuracy':
                 try:
@@ -180,6 +197,9 @@ def eval_model(model, valid_dataloader, args, valid_logs):
     
     pred_list = np.array([])
     labels_list = np.array([])
+
+    pred_mood_list   = np.array([])
+    mood_labels_list = np.array([])
     
     for batch in valid_dataloader:
         batch = tuple(t.cuda(args.device) for t in batch)
@@ -203,18 +223,33 @@ def eval_model(model, valid_dataloader, args, valid_logs):
         emo_loss      = emo_loss_fct(logits, b_labels)
         mood_loss     = mood_loss_fct(m_r, b_response_mood)
         # user_loss     = user_loss_fct(user_emo, b_user_emo)
-        loss          = emo_loss # + user_loss
+        loss          = mood_loss # emo_loss # + user_loss
             
         logits        = logits.detach().to('cpu').numpy()
         label_ids     = b_labels.to('cpu').numpy()                
         pred_flat     = np.argmax(logits, axis=1).flatten()
         labels_flat   = label_ids.flatten()
             
+        m_r = m_r.detach().to('cpu').numpy()
+        mood_labels = b_response_mood.to('cpu').numpy()
+        mood_pred = np.argmax(m_r, axis=1).flatten()
+        mood_labels = mood_labels.flatten()
+
+
         pred_list     = np.append(pred_list, pred_flat)
         labels_list   = np.append(labels_list, labels_flat)
 
-    print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
-    result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
+        pred_mood_list   = np.append(pred_mood_list, mood_pred)
+        mood_labels_list = np.append(mood_labels_list, mood_labels)
+
+
+    # print('Mood prediction\n')
+    # # print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
+    # # result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
+
+    print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
+    result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
+    
     for key in result.keys():
         if key !='accuracy':
             valid_logs.append([
@@ -234,58 +269,65 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
     
     pred_list   = np.array([])
     labels_list = np.array([])
+
+    pred_mood_list   = np.array([])
+    mood_labels_list = np.array([])
+
     test_batch  = []
     tokenizer   =  BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
 
-    with open('result_file.txt', 'w') as f:
+    for batch in test_dataloader:
+        
+        batch = tuple(t.cuda(args.device) for t in batch)
+        b_input_ids, b_input_ids_2, b_input_ids_3, b_attn_masks, b_attn_masks_2,\
+        b_uttr_vad, b_personality, \
+        b_init_emo, b_user_emo, b_response_emo, b_init_mood, b_response_mood, b_labels = batch
 
-        for batch in test_dataloader:
+        with torch.no_grad():
+          # Forward pass, calculate logit predictions
+          # logits, m_r, user_emo = model(b_input_ids_2, b_attn_masks_2, b_uttr_vad, b_personality, b_init_mood)
+            logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
+            # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
+        
+        # mood_loss_fct = nn.CrossEntropyLoss() #nn.MSELoss()
+        mood_loss_fct = nn.CrossEntropyLoss()
+        emo_loss_fct  = nn.CrossEntropyLoss() 
+        user_loss_fct = nn.MSELoss()
+        # weight = torch.FloatTensor([0.6342, 5.9110, 0.8695, 0.5490, 0.4640, 0.8700, 0.7023]).cuda(1)
+        
+
+        emo_loss      = emo_loss_fct(logits, b_labels)
+        mood_loss     = mood_loss_fct(m_r, b_response_mood)
+
+        loss          = emo_loss 
             
-            batch = tuple(t.cuda(args.device) for t in batch)
-            b_input_ids, b_input_ids_2, b_input_ids_3, b_attn_masks, b_attn_masks_2,\
-            b_uttr_vad, b_personality, \
-            b_init_emo, b_user_emo, b_response_emo, b_init_mood, b_response_mood, b_labels = batch
+        logits        = logits.detach().to('cpu').numpy()
+        label_ids     = b_labels.to('cpu').numpy()                
+        pred_flat     = np.argmax(logits, axis=1).flatten()
+        labels_flat   = label_ids.flatten()
 
-            with torch.no_grad():
-              # Forward pass, calculate logit predictions
-              # logits, m_r, user_emo = model(b_input_ids_2, b_attn_masks_2, b_uttr_vad, b_personality, b_init_mood)
-                logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
-                # logits, m_r = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_response_mood)
+        m_r = m_r.detach().to('cpu').numpy()
+        mood_labels = b_response_mood.to('cpu').numpy()
+        mood_pred = np.argmax(m_r, axis=1).flatten()
+        mood_labels = mood_labels.flatten()
+
+
             
-            # mood_loss_fct = nn.CrossEntropyLoss() #nn.MSELoss()
-            mood_loss_fct = nn.CrossEntropyLoss()
-            emo_loss_fct  = nn.CrossEntropyLoss() 
-            user_loss_fct = nn.MSELoss()
-            # weight = torch.FloatTensor([0.6342, 5.9110, 0.8695, 0.5490, 0.4640, 0.8700, 0.7023]).cuda(1)
-            
+        pred_list     = np.append(pred_list, pred_flat)
+        labels_list   = np.append(labels_list, labels_flat)
 
-            emo_loss      = emo_loss_fct(logits, b_labels)
-            mood_loss     = mood_loss_fct(m_r, b_response_mood)
-
-            loss          = emo_loss 
-                
-            logits        = logits.detach().to('cpu').numpy()
-            label_ids     = b_labels.to('cpu').numpy()                
-            pred_flat     = np.argmax(logits, axis=1).flatten()
-            labels_flat   = label_ids.flatten()
-
-            m_r = m_r.detach().to('cpu').numpy()
-            mood_labels = b_response_mood.to('cpu').numpy()
-            mood_pred = np.argmax(m_r, axis=1).flatten()
-            mood_labels = mood_labels.flatten()
+        pred_mood_list   = np.append(pred_mood_list, mood_pred)
+        mood_labels_list = np.append(mood_labels_list, mood_labels)
 
 
-                
-            pred_list     = np.append(pred_list, pred_flat)
-            labels_list   = np.append(labels_list, labels_flat)
+    print('Mood prediction\n')
+    # print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
+    # result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
 
-            f.write(tokenizer.decode(b_input_ids.squeeze()) + '\t')
-            f.write(tokenizer.decode(b_input_ids_3.squeeze())+ '\t')
-            f.write(str(mood_pred) + "\t" + str(mood_labels) + '\t')
-            f.write(str(pred_flat) + "\t" + str(labels_flat) + '\n')
+    print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
+    result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
 
-    print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
-    result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
+
     if result['macro avg']['f1-score'] > best_macro:
         best_macro = result['macro avg']['f1-score']
         best_epoch = epoch
