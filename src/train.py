@@ -159,7 +159,8 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         print('Current best macro is ', best_macro)
         print('Current best epoch is ', best_epoch)
         print('loss list', loss_list)
-        print('mood loss list', mood_loss_list)
+        print('mood mse loss list', mood_mse_loss_list)
+        print('mood cls loss list', mood_cls_loss_list)
 
     df_train_logs = pd.DataFrame(train_logs, columns=['label', 'precision', 'recall', 'f1-score', 'support']).add_prefix('train_')
     df_valid_logs = pd.DataFrame(valid_logs, columns=['precision', 'recall', 'f1-score', 'support']).add_prefix('valid_')
