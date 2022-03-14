@@ -70,7 +70,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             mood_cls_loss = mood_cls_lf(response_mood_logits, b_response_mood_label)
             
             
-            loss          = mood_mse_loss + mood_cls_loss 
+            loss          = mood_mse_loss + mood_cls_loss + emo_loss
             
             
             response_emo         = response_emo.detach().to('cpu').numpy()
@@ -128,12 +128,13 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         loss_list.append(avg_train_loss)
         
         
-        print('Mood prediction\n')
-        # # print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
-        # # result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
+        
+        print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
+        result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
 
-        print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
-        result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
+        # print('Mood prediction\n')
+        # print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
+        # result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
         for key in result.keys():
             if key !='accuracy':
                 try:
@@ -235,12 +236,12 @@ def eval_model(model, valid_dataloader, args, valid_logs):
         mood_labels_list = np.append(mood_labels_list, mood_labels)
 
 
+    
+    print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
+    result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
     # print('Mood prediction\n')
-    # # print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
-    # # result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
-
-    print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
-    result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
+    # print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
+    # result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
     
     for key in result.keys():
         if key !='accuracy':
@@ -307,12 +308,13 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
         mood_labels_list = np.append(mood_labels_list, mood_labels)
 
 
-    print('Mood prediction\n')
-    # print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
-    # result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
+    
+    print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
+    result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
 
-    print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
-    result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
+    # print('Mood prediction\n')
+    # print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
+    # result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
 
 
     if result['macro avg']['f1-score'] > best_macro:
