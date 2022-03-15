@@ -36,9 +36,6 @@ class Emo_Generation(BertPreTrainedModel):
         self.mood_to_hidden = Dense(3, config.hidden_size, self.mid_size)
         self.mood_to_logit = Dense(3, config.hidden_size, 4)
 
-        self.hidden_resize = Dense(config.hidden_size, config.hidden_size, self.mid_size)
-        self.hidden_resize_2 = Dense(config.hidden_size, config.hidden_size, self.mid_size)
-
         self.personality_to_hidden = nn.Linear(3, self.mid_size)
         self.personality_dense = Dense(3, self.mid_size, 3)
 
@@ -51,7 +48,7 @@ class Emo_Generation(BertPreTrainedModel):
         bert_outputs   = self.bert(input_ids, attention_mask=attn_masks)
         bert_hidden    = bert_outputs[1]
 
-        delta_mood = torch.cat((uttr_vad, self.hidden_resize(bert_hidden)), 1) 
+        delta_mood = torch.cat((uttr_vad, bert_hidden), 1) 
 
         response_mood_vad    = F.softmax(self.mood_dense(delta_mood) * self.personality_dense(personality)) * 2 + init_mood
         response_mood_logits = self.mood_to_logit(response_mood_vad)
