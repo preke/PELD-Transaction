@@ -161,7 +161,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
                 print(result[key])
                 train_logs.append(result[key]);
 
-        
+        print(train_logs)
         df_train_logs = pd.DataFrame(train_logs, columns=['label', 'precision', 'recall', 'f1-score', 'support']).add_prefix('train_')
         print(df_train_logs)
         import time
