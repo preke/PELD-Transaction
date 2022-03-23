@@ -146,6 +146,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
                     ])
             else:
                 print(result[key])
+                train_logs.append(result[key]);
 
         for key in mood_result.keys():
             if key !='accuracy':
@@ -156,8 +157,16 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
                         mood_result[key]['f1-score'], 
                         mood_result[key]['support'] 
                     ])
+            else:
+                print(result[key])
+                train_logs.append(result[key]);
+
         
-                    
+        df_train_logs = pd.DataFrame(train_logs, columns=['label', 'precision', 'recall', 'f1-score', 'support']).add_prefix('train_')
+        print(df_train_logs)
+        import time
+        time.sleep(100)
+
         # valid_logs = eval_model(model, valid_dataloader, args, valid_logs)
         # test_logs, pred_list, best_macro, best_epoch = test_model(model, test_dataloader, args, test_logs, best_macro, best_epoch, _)
         # print('Current best macro is ', best_macro)
