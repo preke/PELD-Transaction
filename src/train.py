@@ -251,7 +251,8 @@ def eval_model(model, valid_dataloader, args, valid_logs):
     print('Mood prediction\n')
     print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
     mood_result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
-        for key in result.keys():
+
+    for key in result.keys():
             if key !='accuracy':
                     valid_logs.append([
                         key, 
@@ -263,7 +264,7 @@ def eval_model(model, valid_dataloader, args, valid_logs):
             else:
                 valid_logs.append(['accuracy', 0,0,result[key],0]);
 
-        for key in mood_result.keys():
+    for key in mood_result.keys():
             if key !='accuracy':
                     valid_logs.append([
                         'mood_'+key,
@@ -338,7 +339,7 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
     print('Mood prediction\n')
     print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
     mood_result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
-        for key in result.keys():
+    for key in result.keys():
             if key !='accuracy':
                     test_logs.append([
                         key, 
@@ -350,7 +351,7 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
             else:
                 test_logs.append(['accuracy', 0,0,result[key],0]);
 
-        for key in mood_result.keys():
+    for key in mood_result.keys():
             if key !='accuracy':
                     test_logs.append([
                         'mood_'+key,
