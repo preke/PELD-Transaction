@@ -157,14 +157,14 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
                         mood_result[key]['support'] 
                     ])
         
-
-        valid_logs = eval_model(model, valid_dataloader, args, valid_logs)
-        test_logs, pred_list, best_macro, best_epoch = test_model(model, test_dataloader, args, test_logs, best_macro, best_epoch, _)
-        print('Current best macro is ', best_macro)
-        print('Current best epoch is ', best_epoch)
-        print('loss list', loss_list)
-        print('mood mse loss list', mood_mse_loss_list)
-        print('mood cls loss list', mood_cls_loss_list)
+                    
+        # valid_logs = eval_model(model, valid_dataloader, args, valid_logs)
+        # test_logs, pred_list, best_macro, best_epoch = test_model(model, test_dataloader, args, test_logs, best_macro, best_epoch, _)
+        # print('Current best macro is ', best_macro)
+        # print('Current best epoch is ', best_epoch)
+        # print('loss list', loss_list)
+        # print('mood mse loss list', mood_mse_loss_list)
+        # print('mood cls loss list', mood_cls_loss_list)
 
     df_train_logs = pd.DataFrame(train_logs, columns=['label', 'precision', 'recall', 'f1-score', 'support']).add_prefix('train_')
     print(df_train_logs)
