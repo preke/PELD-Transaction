@@ -132,8 +132,8 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
         result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
 
-        # print('Mood prediction\n')
-        # print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
+        print('Mood prediction\n')
+        print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
         mood_result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
         for key in result.keys():
             if key !='accuracy':
@@ -145,7 +145,6 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
                         result[key]['support'] 
                     ])
             else:
-                print(result[key])
                 train_logs.append(['accuracy', 0,0,result[key],0]);
 
         for key in mood_result.keys():
@@ -158,27 +157,22 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
                         mood_result[key]['support'] 
                     ])
             else:
-                print(result[key])
                 train_logs.append(['mood_'+'accuracy', 0,0,result[key],0]);
 
-        print(train_logs)
-        df_train_logs = pd.DataFrame(train_logs, columns=['label', 'precision', 'recall', 'f1-score', 'support']).add_prefix('train_')
-        print(df_train_logs)
-        import time
-        time.sleep(100)
+        
+        
 
-        # valid_logs = eval_model(model, valid_dataloader, args, valid_logs)
-        # test_logs, pred_list, best_macro, best_epoch = test_model(model, test_dataloader, args, test_logs, best_macro, best_epoch, _)
-        # print('Current best macro is ', best_macro)
-        # print('Current best epoch is ', best_epoch)
-        # print('loss list', loss_list)
-        # print('mood mse loss list', mood_mse_loss_list)
-        # print('mood cls loss list', mood_cls_loss_list)
+
+        valid_logs = eval_model(model, valid_dataloader, args, valid_logs)
+        test_logs, pred_list, best_macro, best_epoch = test_model(model, test_dataloader, args, test_logs, best_macro, best_epoch, _)
+        print('Current best macro is ', best_macro)
+        print('Current best epoch is ', best_epoch)
+        print('loss list', loss_list)
+        print('mood mse loss list', mood_mse_loss_list)
+        print('mood cls loss list', mood_cls_loss_list)
 
     df_train_logs = pd.DataFrame(train_logs, columns=['label', 'precision', 'recall', 'f1-score', 'support']).add_prefix('train_')
-    print(df_train_logs)
-    import time
-    time.sleep(100)
+
     df_valid_logs = pd.DataFrame(valid_logs, columns=['precision', 'recall', 'f1-score', 'support']).add_prefix('valid_')
     df_test_logs  = pd.DataFrame(test_logs, columns=['precision', 'recall', 'f1-score', 'support']).add_prefix('test_')
 
@@ -254,17 +248,32 @@ def eval_model(model, valid_dataloader, args, valid_logs):
     
     print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
     result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
-    # print('Mood prediction\n')
-    # print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
-    # result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
-    
-    for key in result.keys():
-            valid_logs.append([
-                    result[key]['precision'], 
-                    result[key]['recall'], 
-                    result[key]['f1-score'], 
-                    result[key]['support'] 
-                ])
+    print('Mood prediction\n')
+    print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
+    mood_result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
+        for key in result.keys():
+            if key !='accuracy':
+                    valid_logs.append([
+                        key, 
+                        result[key]['precision'], 
+                        result[key]['recall'], 
+                        result[key]['f1-score'], 
+                        result[key]['support'] 
+                    ])
+            else:
+                valid_logs.append(['accuracy', 0,0,result[key],0]);
+
+        for key in mood_result.keys():
+            if key !='accuracy':
+                    valid_logs.append([
+                        'mood_'+key,
+                        mood_result[key]['precision'], 
+                        mood_result[key]['recall'], 
+                        mood_result[key]['f1-score'], 
+                        mood_result[key]['support'] 
+                    ])
+            else:
+                valid_logs.append(['mood_'+'accuracy', 0,0,result[key],0]);
     return valid_logs
 
 
@@ -326,24 +335,37 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
     print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
     result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
 
-    # print('Mood prediction\n')
-    # print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
-    # result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
+    print('Mood prediction\n')
+    print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
+    mood_result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
+        for key in result.keys():
+            if key !='accuracy':
+                    test_logs.append([
+                        key, 
+                        result[key]['precision'], 
+                        result[key]['recall'], 
+                        result[key]['f1-score'], 
+                        result[key]['support'] 
+                    ])
+            else:
+                test_logs.append(['accuracy', 0,0,result[key],0]);
 
+        for key in mood_result.keys():
+            if key !='accuracy':
+                    test_logs.append([
+                        'mood_'+key,
+                        mood_result[key]['precision'], 
+                        mood_result[key]['recall'], 
+                        mood_result[key]['f1-score'], 
+                        mood_result[key]['support'] 
+                    ])
+            else:
+                test_logs.append(['mood_'+'accuracy', 0,0,result[key],0]);
 
     if result['macro avg']['f1-score'] > best_macro:
         best_macro = result['macro avg']['f1-score']
         best_epoch = epoch
         shutil.copyfile('result_file.txt', 'cls_best_result.txt')
-
-
-    for key in result.keys():
-            test_logs.append([
-                    result[key]['precision'], 
-                    result[key]['recall'], 
-                    result[key]['f1-score'], 
-                    result[key]['support'] 
-                ])
     
     return test_logs, pred_list, best_macro, best_epoch
 
