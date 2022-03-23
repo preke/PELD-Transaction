@@ -134,8 +134,11 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
 
         # print('Mood prediction\n')
         # print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
-        # result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
+        mood_result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
         for key in result.keys():
+            print(result[key])
+            import time
+            time.sleep(10);
             if key !='accuracy':
                 try:
                     train_logs.append([
@@ -152,6 +155,28 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
                         result[key]['recall'], 
                         result[key]['f1-score'], 
                         result[key]['support'] 
+                    ])
+
+        for key in mood_result.keys():
+            print(mood_result[key])
+            import time
+            time.sleep(10);
+            if key !='accuracy':
+                try:
+                    train_logs.append([
+                        labelencoder.classes_[int(eval(key))], 
+                        mood_result[key]['precision'], 
+                        mood_result[key]['recall'], 
+                        mood_result[key]['f1-score'], 
+                        mood_result[key]['support'] 
+                    ])
+                except:
+                    train_logs.append([
+                        key, 
+                        mood_result[key]['precision'], 
+                        mood_result[key]['recall'], 
+                        mood_result[key]['f1-score'], 
+                        mood_result[key]['support'] 
                     ])
         
 
