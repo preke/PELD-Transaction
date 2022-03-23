@@ -136,7 +136,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         # print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
         mood_result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
         for key in result.keys():
-            print(result[key])
+            print(key, result[key])
             import time
             time.sleep(10);
             if key !='accuracy':
@@ -158,7 +158,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
                     ])
 
         for key in mood_result.keys():
-            print(mood_result[key])
+            print(key, mood_result[key])
             import time
             time.sleep(10);
             if key !='accuracy':
