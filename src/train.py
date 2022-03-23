@@ -181,6 +181,9 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         print('mood cls loss list', mood_cls_loss_list)
 
     df_train_logs = pd.DataFrame(train_logs, columns=['label', 'precision', 'recall', 'f1-score', 'support']).add_prefix('train_')
+    print(df_train_logs)
+    import time
+    time.sleep(100)
     df_valid_logs = pd.DataFrame(valid_logs, columns=['precision', 'recall', 'f1-score', 'support']).add_prefix('valid_')
     df_test_logs  = pd.DataFrame(test_logs, columns=['precision', 'recall', 'f1-score', 'support']).add_prefix('test_')
 
