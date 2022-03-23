@@ -26,7 +26,7 @@ args.adam_epsilon  = 1e-8
 args.epochs        = 50
 
 
-seed_list = [0, 1, 2, 41, 42, 123, 234, 345, 456, 567]
+seed_list = [41, 42, 123, 234, 345, 456, 567]
 for seed in  seed_list:
     args.SEED          = seed
     args.result_name   = 'BERT_baseline_' + str(args.SEED) + '.csv'
