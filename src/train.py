@@ -146,12 +146,12 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
                     ])
             else:
                 print(result[key])
-                train_logs.append(result[key]);
+                train_logs.append(['accuracy', 0,0,result[key],0]);
 
         for key in mood_result.keys():
             if key !='accuracy':
                     train_logs.append([
-                        key,
+                        'mood_'+key,
                         mood_result[key]['precision'], 
                         mood_result[key]['recall'], 
                         mood_result[key]['f1-score'], 
@@ -159,7 +159,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
                     ])
             else:
                 print(result[key])
-                train_logs.append(result[key]);
+                train_logs.append(['mood_'+'accuracy', 0,0,result[key],0]);
 
         print(train_logs)
         df_train_logs = pd.DataFrame(train_logs, columns=['label', 'precision', 'recall', 'f1-score', 'support']).add_prefix('train_')
