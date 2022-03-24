@@ -291,7 +291,7 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
     mood_labels_list = np.array([])
 
     test_batch  = []
-    tokenizer   =  BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
+    # tokenizer   =  BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
 
     for batch in test_dataloader:
         batch = tuple(t.cuda(args.device) for t in batch)
