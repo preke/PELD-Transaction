@@ -21,12 +21,12 @@ args.base          = 'BERT'
 
 args.MAX_LEN       = 128 
 args.batch_size    = 16
-args.lr            = 1e-5
+args.lr            = 2e-5
 args.adam_epsilon  = 1e-8
 args.epochs        = 50
 
 
-seed_list = [41, 42, 123, 234, 345, 456, 567]
+seed_list = [42]#, 42, 123, 234, 345, 456, 567]
 for seed in  seed_list:
     args.SEED          = seed
     args.result_name   = 'test_' + str(args.SEED) + '.csv'

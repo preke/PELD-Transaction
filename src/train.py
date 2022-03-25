@@ -246,10 +246,10 @@ def eval_model(model, valid_dataloader, args, valid_logs):
 
 
     
-    print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
+    # print(classification_report(pred_list, labels_list, digits=4, output_dict=False))
     result = classification_report(pred_list, labels_list, digits=4, output_dict=True)
-    print('Mood prediction\n')
-    print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
+    # print('Mood prediction\n')
+    # print(classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=False))
     mood_result = classification_report(pred_mood_list, mood_labels_list, digits=4, output_dict=True)
 
     for key in result.keys():
