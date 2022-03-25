@@ -21,7 +21,7 @@ args.base          = 'BERT'
 
 args.MAX_LEN       = 128 
 args.batch_size    = 16
-args.lr            = 3e-5
+args.lr            = 2e-4
 args.adam_epsilon  = 1e-8
 args.epochs        = 50
 
