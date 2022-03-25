@@ -87,6 +87,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
 
     mood_cls_loss_list = []
     mood_mse_loss_list = []
+    emo_cls_loss_list = []
 
     loss_list = []
     
@@ -100,6 +101,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         batch_loss = 0
         mood_batch_mse_loss = 0
         mood_batch_cls_loss = 0
+        emo_batch_cls_loss = 0
         
         train_accuracy, nb_train_steps = 0, 0
         
@@ -167,12 +169,14 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             batch_loss += loss.item()
             mood_batch_mse_loss += mood_mse_loss.item()
             mood_batch_cls_loss += mood_cls_loss.item()
+            emo_batch_cls_loss  += emo_loss
       
         #  Calculate the average loss over the training data.
         avg_train_loss = batch_loss / len(train_dataloader)
         
         avg_mood_mse_loss = mood_batch_mse_loss / len(train_dataloader)
         avg_mood_cls_loss = mood_batch_cls_loss / len(train_dataloader)
+        avg_emo_cls_loss  = emo_batch_cls_loss / len(train_dataloader)
 
         #store the current learning rate
         for param_group in optimizer.param_groups:
@@ -181,9 +185,11 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         # print("\n\tCurrent overall loss: ", avg_train_loss)
         print("\n\tCurrent mood cls loss: ", avg_mood_cls_loss)
         print("\n\tCurrent mood mse loss: ", avg_mood_mse_loss)
+        print("\n\tCurrent emo cls loss: ", avg_emo_cls_loss)
 
-        mood_mse_loss_list.append(mood_batch_mse_loss)
-        mood_cls_loss_list.append(mood_batch_cls_loss)
+        mood_mse_loss_list.append(avg_mood_mse_loss)
+        mood_cls_loss_list.append(avg_mood_cls_loss)
+        emo_cls_loss_list.append(avg_emo_cls_loss)
         loss_list.append(avg_train_loss)
         
         
