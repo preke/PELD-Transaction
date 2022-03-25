@@ -128,6 +128,8 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             print(torch.sign(response_mood_vad))
             print('**'*50)
             print(b_response_mood_vad)
+            print('='*50)
+            print(b_response_mood_label)
             mood_cls_loss = mood_cls_lf(response_mood_logits, b_response_mood_label)
             
             
