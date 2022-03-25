@@ -235,6 +235,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
         print('loss list', loss_list)
         print('mood mse loss list', mood_mse_loss_list)
         print('mood cls loss list', mood_cls_loss_list)
+        print('emo cls loss list', emo_cls_loss_list)
 
     df_train_logs = pd.DataFrame(train_logs, columns=['label', 'precision', 'recall', 'f1-score', 'support']).add_prefix('train_')
 
