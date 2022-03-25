@@ -169,7 +169,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             batch_loss += loss.item()
             mood_batch_mse_loss += mood_mse_loss.item()
             mood_batch_cls_loss += mood_cls_loss.item()
-            emo_batch_cls_loss  += emo_loss
+            emo_batch_cls_loss  += emo_loss.item()
       
         #  Calculate the average loss over the training data.
         avg_train_loss = batch_loss / len(train_dataloader)
@@ -225,9 +225,6 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
                 train_logs.append(['mood_'+'accuracy', 0,0,result[key],0]);
 
         
-        
-
-
         valid_logs = eval_model(model, valid_dataloader, args, valid_logs)
         test_logs, pred_list, best_macro, best_epoch = test_model(model, test_dataloader, args, test_logs, best_macro, best_epoch, _)
         print('Current best macro is ', best_macro)
