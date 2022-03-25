@@ -14,6 +14,36 @@ import random
 import shutil
 from utils import Emotion_dict
 
+
+
+
+class FocalLoss(nn.Module):
+    def __init__(self, gamma=2, weight=None, reduction='mean'):
+        super(FocalLoss, self).__init__()
+        self.gamma = gamma
+        self.weight = weight
+        self.reduction = reduction
+ 
+    def forward(self, output, target):
+        # convert output to pseudo probability
+        out_target = torch.stack([output[i, t] for i, t in enumerate(target)])
+        probs = torch.sigmoid(out_target)
+        focal_weight = torch.pow(1-probs, self.gamma)
+ 
+        # add focal weight to cross entropy
+        ce_loss = F.cross_entropy(output, target, weight=self.weight, reduction='none')
+        focal_loss = focal_weight * ce_loss
+ 
+        if self.reduction == 'mean':
+            focal_loss = (focal_loss/focal_weight.sum()).sum()
+        elif self.reduction == 'sum':
+            focal_loss = focal_loss.sum()
+ 
+        return focal_loss
+
+
+
+
 def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader):
     
     num_warmup_steps = 0
@@ -62,8 +92,8 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             response_mood_vad, response_mood_logits, response_emo = model(b_input_ids, b_attn_masks, b_uttr_vad, b_personality, b_init_mood)
             
             mood_mse_lf  = nn.MSELoss()
-            mood_cls_lf  = nn.CrossEntropyLoss()
-            emo_loss_fct = nn.CrossEntropyLoss()
+            mood_cls_lf  = FocalLoss() # nn.CrossEntropyLoss()
+            emo_loss_fct = FocalLoss() # nn.CrossEntropyLoss()
 
             emo_loss      = emo_loss_fct(response_emo, b_labels)
             mood_mse_loss = mood_mse_lf(torch.sign(response_mood_vad), b_response_mood_vad)
