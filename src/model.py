@@ -37,7 +37,7 @@ class Emo_Generation(BertPreTrainedModel):
         self.bert = BertModel(config)
         self.mid_size = 768
         self.scale = nn.Parameter(torch.FloatTensor([1.0]))
-        self.dropout = nn.Dropout(0.9)
+        self.dropout = nn.Dropout(0.1)
 
         self.mood_dense = Dense(self.mid_size+3, config.hidden_size, 3)
         self.mood_to_hidden = Dense(3, config.hidden_size, self.mid_size)
