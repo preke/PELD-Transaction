@@ -18,8 +18,8 @@ args = parser.parse_args()
 
 args.device        = 1
 args.base          = 'BERT'
-
-args.MAX_LEN       = 256 
+args.mode          = 4
+args.MAX_LEN       = 128 
 args.batch_size    = 16
 args.lr            = 1e-5
 args.adam_epsilon  = 1e-8
@@ -46,7 +46,7 @@ for seed in  seed_list:
 
 
     if args.base == 'RoBERTa':
-        model = Emo_Generation.from_pretrained('roberta-base').cuda(args.device)
+        model = Emo_Generation.from_pretrained('roberta-base', mode=args.mode).cuda(args.device)
     else:
         model = Emo_Generation.from_pretrained('bert-base-uncased').cuda(args.device)
         
