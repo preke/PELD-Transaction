@@ -137,7 +137,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             
             
            
-
+            print(mood_mse_loss)
             losses = torch.tensor([mood_mse_loss, emo_loss, mood_cls_loss])
             loss_w = get_losses_weights(losses) 
             new_losses = losses * loss_w
