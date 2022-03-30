@@ -72,6 +72,13 @@ class MultiFocalLoss(nn.Module):
         return loss
 
 
+def get_losses_weights(losses):
+    if type(losses) != torch.Tensor:
+        losses = torch.tensor(losses)
+    weights = torch.div(losses, torch.sum(losses)) * losses.shape[0]
+    return weights
+
+
 def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader):
     
     num_warmup_steps = 0
@@ -131,7 +138,14 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             mood_cls_loss = mood_cls_lf(response_mood_logits, b_response_mood_label)
             
             
-            loss          = mood_mse_loss + emo_loss + 0.1*mood_cls_loss # + emo_loss 
+           
+
+            losses = torch.tensor([mood_mse_loss, emo_loss, mood_cls_loss])
+            loss_w = get_losses_weights(losses) 
+            new_losses = losses * loss_w
+            loss = torch.sum(new_losses) 
+
+            # loss          = mood_mse_loss + emo_loss + 0.1*mood_cls_loss # + emo_loss 
             
             
             response_emo         = response_emo.detach().to('cpu').numpy()
