@@ -58,7 +58,7 @@ class Emo_Generation(BertPreTrainedModel):
         delta_mood           = torch.cat((uttr_vad, self.hidden_resize(bert_hidden)), 1) 
         
         # response_mood_vad    = F.softmax(self.mood_dense(delta_mood) * personality) + init_mood
-        response_mood_vad    = F.softmax(self.mood_dense(delta_mood)) * personality * 1.1 + init_mood
+        response_mood_vad    = F.softmax(self.mood_dense(delta_mood)) * personality + init_mood
         
         response_mood_logits = self.mood_to_logit(response_mood_vad)
         emo_embedding        = torch.cat((self.mood_to_hidden(response_mood_vad), bert_hidden, self.personality_to_hidden(personality)), 1)
