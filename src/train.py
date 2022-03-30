@@ -73,8 +73,6 @@ class MultiFocalLoss(nn.Module):
 
 
 def get_losses_weights(losses):
-    if type(losses) != torch.Tensor:
-        losses = torch.tensor(losses)
     weights = torch.div(losses, torch.sum(losses)) * losses.shape[0]
     return weights
 
