@@ -126,8 +126,8 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             emo_loss_fct = MultiFocalLoss(num_class=7, gamma=2.0, reduction='mean') # nn.CrossEntropyLoss()
 
             emo_loss      = emo_loss_fct(response_emo, b_labels)
-            # mood_mse_loss = mood_mse_lf(torch.sign(response_mood_vad), b_response_mood_vad)
-            mood_mse_loss = mood_mse_lf(response_mood_vad, b_response_mood_vad)
+            mood_mse_loss = mood_mse_lf(torch.sign(response_mood_vad), b_response_mood_vad)
+            # mood_mse_loss = mood_mse_lf(response_mood_vad, b_response_mood_vad)
             mood_cls_loss = mood_cls_lf(response_mood_logits, b_response_mood_label)
             
             
