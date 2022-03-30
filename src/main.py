@@ -21,15 +21,15 @@ args.base          = 'BERT'
 args.mode          = 4
 args.MAX_LEN       = 128 
 args.batch_size    = 16
-args.lr            = 5e-6
+args.lr            = 1e-5
 args.adam_epsilon  = 1e-8
-args.epochs        = 100
+args.epochs        = 50
 
 
 seed_list = [42]#, 42, 123, 234, 345, 456, 567]
 for seed in  seed_list:
     args.SEED          = seed
-    args.result_name   = 'Test' + str(args.SEED) + '.csv'
+    args.result_name   = 'BERT_MTR_Test' + str(args.SEED) + '.csv'
 
     np.random.seed(args.SEED)
     torch.manual_seed(args.SEED)
