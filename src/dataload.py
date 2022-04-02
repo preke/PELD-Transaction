@@ -30,7 +30,7 @@ def get_sent_vad(VAD_dict, input_ids, tokenizer):
     v_score/=float(len(w_list))
     a_score/=float(len(w_list))
     d_score/=float(len(w_list))
-    VAD_scores.append([v_score, a_score, d_score])
+    VAD_scores = [v_score, a_score, d_score]
     return VAD_scores
 
 def personality_to_vad(personality):
