@@ -115,7 +115,10 @@ def load_data(args, DATA_PATH):
     # uttr_vad = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids]
     uttr_vad_1 = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids_2]
     uttr_vad_2 = user_emo
-    print(uttr_vad_2)
+    i = 0
+    print((uttr_vad_1[i][0] + uttr_vad_2[i][0])/2.0)
+    print((uttr_vad_1[i][1] + uttr_vad_2[i][1])/2.0)
+    print((uttr_vad_1[i][2] + uttr_vad_2[i][2])/2.0)
     uttr_vad = [[(uttr_vad_1[i][0] + uttr_vad_2[i][0])/2.0, 
                  (uttr_vad_1[i][1] + uttr_vad_2[i][1])/2.0,
                  (uttr_vad_1[i][2] + uttr_vad_2[i][2])/2.0] for i in range(len(uttr_vad_1))]
