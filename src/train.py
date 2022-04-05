@@ -124,14 +124,16 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             b_uttr_vad, b_personality, b_init_emo, b_user_emo, b_response_emo, \
             b_init_mood, b_response_mood_vad, b_response_mood_label, b_labels = batch
             
-            response_mood_vad, response_mood_logits, response_emo = model(b_input_ids, b_attn_masks, b_uttr_vad, b_user_emo, b_personality, b_init_mood)
+            response_mood_vad, response_mood_logits, response_emo, response_emo_vad = model(b_input_ids, b_attn_masks, b_uttr_vad, b_user_emo, b_personality, b_init_mood)
             
             mood_mse_lf  = nn.MSELoss()
             mood_cls_lf  = MultiFocalLoss(num_class=4, gamma=2.0, reduction='mean') # nn.CrossEntropyLoss()
             emo_loss_fct = MultiFocalLoss(num_class=7, gamma=2.0, reduction='mean') # nn.CrossEntropyLoss()
+            emo_mse_lf   = nn.MSELoss()
+
 
             emo_loss      = emo_loss_fct(response_emo, b_labels)
-            # mood_mse_loss = mood_mse_lf(torch.sign(response_mood_vad), b_response_mood_vad)
+            emo_mse_loss  = emo_mse_lf(response_emo_vad, b_response_emo)
             mood_mse_loss = mood_mse_lf(response_mood_vad, b_response_mood_vad)
             mood_cls_loss = mood_cls_lf(response_mood_logits, b_response_mood_label)
             
@@ -144,7 +146,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             # loss = mood_mse_loss*loss_w[0] + emo_loss*loss_w[1] + mood_cls_loss*loss_w[2]
             
 
-            loss          = mood_mse_loss + emo_loss + mood_cls_loss # + emo_loss 
+            loss          = mood_mse_loss + emo_loss + emo_mse_loss # + mood_cls_loss # + emo_loss 
             
             
             response_emo         = response_emo.detach().to('cpu').numpy()
@@ -288,7 +290,7 @@ def eval_model(model, valid_dataloader, args, valid_logs):
         b_init_mood, b_response_mood_vad, b_response_mood_label, b_labels = batch
         
         with torch.no_grad():
-            response_mood_vad, response_mood_logits, response_emo = model(b_input_ids, b_attn_masks, b_uttr_vad, b_user_emo, b_personality, b_init_mood)
+            response_mood_vad, response_mood_logits, response_emo, response_emo_vad = model(b_input_ids, b_attn_masks, b_uttr_vad, b_user_emo, b_personality, b_init_mood)
         
         mood_mse_lf  = nn.MSELoss()
         mood_cls_lf  = nn.CrossEntropyLoss()
@@ -375,7 +377,7 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
         b_init_mood, b_response_mood_vad, b_response_mood_label, b_labels = batch
 
         with torch.no_grad():
-            response_mood_vad, response_mood_logits, response_emo = model(b_input_ids, b_attn_masks, b_uttr_vad, b_user_emo, b_personality, b_init_mood)
+            response_mood_vad, response_mood_logits, response_emo, response_emo_vad = model(b_input_ids, b_attn_masks, b_uttr_vad, b_user_emo, b_personality, b_init_mood)
         
         mood_mse_lf  = nn.MSELoss()
         mood_cls_lf  = nn.CrossEntropyLoss()

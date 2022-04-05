@@ -18,7 +18,16 @@ args = parser.parse_args()
 
 args.device        = 0
 args.base          = 'BERT'
-args.mode          = 4
+args.mode          = 1
+
+'''
+Mode 1: BERT
+Mode 2: BERT-Mood
+Mode 3: BERT-MT
+Mode 4: Our model
+'''
+
+
 args.MAX_LEN       = 128 
 args.batch_size    = 16
 args.lr            = 1e-5
@@ -26,10 +35,10 @@ args.adam_epsilon  = 1e-8
 args.epochs        = 50
 
 
-seed_list = [42]#, 42, 123, 234, 345, 456, 567]
+seed_list = [42] #, 42, 123, 234, 345, 456, 567, 678, 789, 890]
 for seed in  seed_list:
     args.SEED          = seed
-    args.result_name   = 'BERT_MTRCP_' + str(args.SEED) + '.csv'
+    args.result_name   = 'Mood_' + args.mood + '_seed_' + str(args.SEED) + '.csv'
 
     np.random.seed(args.SEED)
     torch.manual_seed(args.SEED)
