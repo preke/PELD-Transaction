@@ -37,7 +37,7 @@ class Emo_Generation(BertPreTrainedModel):
         self.mood_to_hidden = Dense(3, config.hidden_size, self.mid_size)
         self.mood_to_logit = Dense(3, config.hidden_size, 4)
 
-        self.vad_weight = nn.Parameter(torch.zeros(1), require_grad=True)
+        self.vad_weight = nn.Parameter(torch.zeros(1), requires_grad=True)
 
         self.hidden_resize = Dense(config.hidden_size, config.hidden_size, self.mid_size)
         
