@@ -18,7 +18,7 @@ args = parser.parse_args()
 
 args.device        = 0
 args.base          = 'BERT'
-args.mode          = 1
+args.mode          = '1'
 
 '''
 Mode 1: BERT
