@@ -35,7 +35,7 @@ class Emo_Generation(BertPreTrainedModel):
 
         self.mood_dense = Dense(self.mid_size+3, config.hidden_size, 3)
         self.mood_to_hidden = Dense(3, config.hidden_size, self.mid_size)
-        
+        self.mood_to_logit = Dense(3, config.hidden_size, 4)
 
         self.vad_weight = 0.0
 
@@ -46,7 +46,6 @@ class Emo_Generation(BertPreTrainedModel):
 
         self.hidden_to_vad = Dense(config.hidden_size, config.hidden_size, 3)
 
-        self.mood_to_logit = nn.Linear(3, 4)
         self.classifier = nn.Linear(self.mid_size*3, 7)
 
     def forward(self, input_ids, attn_masks, uttr_vad, user_emo, personality, init_mood):
