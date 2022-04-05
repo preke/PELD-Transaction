@@ -68,7 +68,7 @@ class Emo_Generation(BertPreTrainedModel):
         response_emo_vad    = self.emo_vad(emo_embedding)
         response_emo_logits = self.classifier(emo_embedding)
 
-        return response_mood_vad, response_mood_logits, response_emo, response_emo_vad
+        return response_mood_vad, response_mood_logits, response_emo_logits, response_emo_vad
 
 
 ## mood and emotion distances
