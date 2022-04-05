@@ -144,7 +144,7 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             # loss = mood_mse_loss*loss_w[0] + emo_loss*loss_w[1] + mood_cls_loss*loss_w[2]
             
 
-            loss          = mood_mse_loss + emo_loss # mood_cls_loss # + emo_loss 
+            loss          = mood_mse_loss + emo_loss + mood_cls_loss # + emo_loss 
             
             
             response_emo         = response_emo.detach().to('cpu').numpy()
