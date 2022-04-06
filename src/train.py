@@ -146,6 +146,8 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             
             if args.mode == '1':
                 loss = emo_loss 
+            elif args.mode == '2':
+                loss = mood_cls_loss + emo_loss
             else: 
                 loss = mood_mse_loss + emo_loss
             

@@ -16,7 +16,7 @@ DATA_PATH = '../Dyadic_PELD.tsv'
 parser = argparse.ArgumentParser(description='')
 args = parser.parse_args()
 
-args.device        = 0
+args.device        = 1
 args.base          = 'BERT'
 args.mode          = '1'
 
@@ -37,10 +37,10 @@ args.epochs        = 50
 
 seed_list = [42] #, 42, 123, 234, 345, 456, 567, 678, 789, 890]
 for seed in  seed_list:
-    for mode in ['1', '2', '3', '4']:
+    for mode in ['2']:#['1', '2', '3', '4']:
         args.mode          = mode
         args.SEED          = seed
-        args.result_name   = 'Mood_' + args.mode + '_seed_' + str(args.SEED) + '.csv'
+        args.result_name   = 'Mode_' + args.mode + '_seed_' + str(args.SEED) + '.csv'
 
         np.random.seed(args.SEED)
         torch.manual_seed(args.SEED)
