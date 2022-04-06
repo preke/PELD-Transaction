@@ -85,7 +85,7 @@ class BERT_Emo_Generation(BertPreTrainedModel):
         self.mood_classifier = nn.Linear(self.mid_size, 4)
         self.classifier      = nn.Linear(self.mid_size, 7)
 
-    def forward(self, input_ids, attn_masks, uttr_vad, personality, init_mood):
+    def forward(self, input_ids, attn_masks, uttr_vad, user_emo, personality, init_mood):
         
         bert_outputs   = self.bert(input_ids, attention_mask=attn_masks)
         bert_hidden    = bert_outputs[1]
