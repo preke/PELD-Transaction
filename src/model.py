@@ -27,27 +27,23 @@ class Dense(nn.Module):
     
 class Emo_Generation(BertPreTrainedModel):
 
-    def __init__(self, config):
+    def __init__(self, config, mode):
         super().__init__(config)
         self.num_labels = 7
-        self.bert = BertModel(config)
-        self.mid_size = 768
-
-        self.mood_dense = Dense(self.mid_size+3, config.hidden_size, 3)
-        self.mood_to_hidden = Dense(3, config.hidden_size, self.mid_size)
-        self.mood_to_logit = Dense(3, config.hidden_size, 4)
-
+        self.bert       = BertModel(config)
+        self.mid_size   = 768
+        self.mode       = mode
         self.vad_weight = 0.0
 
-        self.hidden_resize = Dense(config.hidden_size, config.hidden_size, self.mid_size)
-        
-        self.personality_to_hidden = nn.Linear(3, self.mid_size)
-        # self.personality_dense = Dense(3, self.mid_size, 3)
+        self.mood_dense            = Dense(self.mid_size+3, config.hidden_size, 3)
+        self.mood_to_hidden        = Dense(3, config.hidden_size, self.mid_size)
+        self.mood_to_logit         = Dense(3, config.hidden_size, 4)
 
-        self.hidden_to_vad = Dense(config.hidden_size, config.hidden_size, 3)
+        self.hidden_resize         = Dense(config.hidden_size, config.hidden_size, self.mid_size)
+        self.personality_to_hidden = nn.Linear(3, self.mid_size)
+        self.hidden_to_vad         = Dense(config.hidden_size, config.hidden_size, 3)
 
         self.classifier = nn.Linear(self.mid_size*3, 7)
-        self.emo_vad = nn.Linear(self.mid_size*3, 3)
 
     def forward(self, input_ids, attn_masks, uttr_vad, user_emo, personality, init_mood):
         
@@ -58,42 +54,45 @@ class Emo_Generation(BertPreTrainedModel):
 
         delta_mood           = torch.cat((uttr_vad, self.hidden_resize(bert_hidden)), 1) 
         
-        # response_mood_vad    = F.softmax(self.mood_dense(delta_mood)) * personality + init_mood
-        response_mood_vad    = F.softmax(self.mood_dense(delta_mood)) + init_mood
+        if self.mode == '3':
+            response_mood_vad    = F.softmax(self.mood_dense(delta_mood)) + init_mood
+        elif self.mode == '4':
+            response_mood_vad    = F.softmax(self.mood_dense(delta_mood)) * personality + init_mood
         
         response_mood_logits = self.mood_to_logit(response_mood_vad)
-        emo_embedding        = torch.cat((self.mood_to_hidden(response_mood_vad), bert_hidden, self.personality_to_hidden(personality)), 1)
-        # emo_embedding        = torch.cat((self.mood_to_hidden(response_mood_vad), bert_hidden, 0*self.personality_to_hidden(personality)), 1)
         
-        response_emo_vad    = self.emo_vad(emo_embedding)
+        if self.mode == '3':
+            emo_embedding        = torch.cat((self.mood_to_hidden(response_mood_vad), bert_hidden, 0*self.personality_to_hidden(personality)), 1)
+        elif self.mode == '4':
+            emo_embedding        = torch.cat((self.mood_to_hidden(response_mood_vad), bert_hidden, self.personality_to_hidden(personality)), 1)
+        
         response_emo_logits = self.classifier(emo_embedding)
-
-        return response_mood_vad, response_mood_logits, response_emo_logits, response_emo_vad
+        return response_mood_vad, response_mood_logits, response_emo_logits
 
 
 ## mood and emotion distances
 ## moods inter distances
 
     
-# class Emo_Generation(BertPreTrainedModel):
+class BERT_Emo_Generation(BertPreTrainedModel):
 
-#     def __init__(self, config):
-#         super().__init__(config)
-#         self.num_labels = 7
-#         self.bert = BertModel(config)
-#         self.mid_size = 768
+    def __init__(self, config, mode):
+        super().__init__(config)
+        self.num_labels      = 7
+        self.bert            = BertModel(config)
+        self.mid_size        = 768
+        self.mode            = mode
+        self.mood_classifier = nn.Linear(self.mid_size, 4)
+        self.classifier      = nn.Linear(self.mid_size, 7)
 
-#         self.mood_classifier = nn.Linear(self.mid_size, 4)
-#         self.classifier = nn.Linear(self.mid_size, 7)
-
-#     def forward(self, input_ids, attn_masks, uttr_vad, personality, init_mood):
+    def forward(self, input_ids, attn_masks, uttr_vad, personality, init_mood):
         
-#         bert_outputs   = self.bert(input_ids, attention_mask=attn_masks)
-#         bert_hidden    = bert_outputs[1]
-#         response_mood_logits = self.mood_classifier(bert_hidden)
-#         response_emo   = self.classifier(bert_hidden)
-#         response_mood_vad    = init_mood
-#         return response_mood_vad, response_mood_logits, response_emo
+        bert_outputs   = self.bert(input_ids, attention_mask=attn_masks)
+        bert_hidden    = bert_outputs[1]
+        response_mood_logits = self.mood_classifier(bert_hidden)
+        response_emo   = self.classifier(bert_hidden)
+        response_mood_vad    = init_mood
+        return response_mood_vad, response_mood_logits, response_emo
 
 
 
