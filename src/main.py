@@ -35,7 +35,7 @@ args.adam_epsilon  = 1e-8
 args.epochs        = 50
 
 
-seed_list = [890, 789]#[41, 42, 123, 234, 345, 456, 567, 678, 789, 890]
+seed_list = [567, 678]#[41, 42, 123, 234, 345, 456, 567, 678, 789, 890]
 
 for seed in  seed_list:
     for mode in ['1', '2', '3', '4']:
