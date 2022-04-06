@@ -16,7 +16,7 @@ DATA_PATH = '../Dyadic_PELD.tsv'
 parser = argparse.ArgumentParser(description='')
 args = parser.parse_args()
 
-args.device        = 1
+args.device        = 0
 args.base          = 'BERT'
 args.mode          = '1'
 
@@ -35,7 +35,8 @@ args.adam_epsilon  = 1e-8
 args.epochs        = 50
 
 
-seed_list = [41, 42, 123, 234, 345, 456, 567, 678, 789, 890]
+seed_list = [890, 789]#[41, 42, 123, 234, 345, 456, 567, 678, 789, 890]
+
 for seed in  seed_list:
     for mode in ['1', '2', '3', '4']:
         args.mode          = mode
