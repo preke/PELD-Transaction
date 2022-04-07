@@ -406,11 +406,11 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
             pred_mood_list   = np.append(pred_mood_list, mood_pred)
             mood_labels_list = np.append(mood_labels_list, mood_labels)
 
-            print(b_input_ids)
-            f.write(tokenizer.decode(b_input_ids.squeeze()) + '\t')
-            f.write(tokenizer.decode(b_input_ids_3.squeeze())+ '\t')
-            f.write(str(mood_pred) + "\t" + str(mood_labels) + '\t')
-            f.write(str(pred_flat) + "\t" + str(labels_flat) + '\n')
+            for i in range(len(b_input_ids)):
+                f.write(tokenizer.decode(b_input_ids[i]) + '\t')
+                f.write(tokenizer.decode(b_input_ids_3[i])+ '\t')
+                f.write(str(mood_pred[i]) + "\t" + str(mood_labels[i]) + '\t')
+                f.write(str(pred_flat[i]) + "\t" + str(labels_flat[i]) + '\n')
 
 
     
