@@ -370,45 +370,46 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
     mood_labels_list = np.array([])
 
     test_batch  = []
-    # tokenizer   =  BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
+    tokenizer   =  BertTokenizer.from_pretrained("bert-base-uncased", do_lower_case=True)
+    with open('result_file.txt', 'w') as f:
+        for batch in test_dataloader:
+            batch = tuple(t.cuda(args.device) for t in batch)
+            b_input_ids, b_input_ids_2, b_input_ids_3, b_attn_masks, b_attn_masks_2,\
+            b_uttr_vad, b_personality, b_init_emo, b_user_emo, b_response_emo, \
+            b_init_mood, b_response_mood_vad, b_response_mood_label, b_labels = batch
 
-    for batch in test_dataloader:
-        batch = tuple(t.cuda(args.device) for t in batch)
-        b_input_ids, b_input_ids_2, b_input_ids_3, b_attn_masks, b_attn_masks_2,\
-        b_uttr_vad, b_personality, b_init_emo, b_user_emo, b_response_emo, \
-        b_init_mood, b_response_mood_vad, b_response_mood_label, b_labels = batch
+            with torch.no_grad():
+                response_mood_vad, response_mood_logits, response_emo = model(b_input_ids, b_attn_masks, b_uttr_vad, b_user_emo, b_personality, b_init_mood)
+            
+            mood_mse_lf  = nn.MSELoss()
+            mood_cls_lf  = nn.CrossEntropyLoss()
+            emo_loss_fct = nn.CrossEntropyLoss()
 
-        with torch.no_grad():
-            response_mood_vad, response_mood_logits, response_emo = model(b_input_ids, b_attn_masks, b_uttr_vad, b_user_emo, b_personality, b_init_mood)
-        
-        mood_mse_lf  = nn.MSELoss()
-        mood_cls_lf  = nn.CrossEntropyLoss()
-        emo_loss_fct = nn.CrossEntropyLoss()
+            emo_loss      = emo_loss_fct(response_emo, b_labels)
+            mood_mse_loss = mood_mse_lf(torch.sign(response_mood_vad), b_response_mood_vad)
+            mood_cls_loss = mood_cls_lf(response_mood_logits, b_response_mood_label)
+            
+            response_emo         = response_emo.detach().to('cpu').numpy()
+            label_ids            = b_labels.to('cpu').numpy()                
+            pred_flat            = np.argmax(response_emo, axis=1).flatten()
+            labels_flat          = label_ids.flatten()
 
-        emo_loss      = emo_loss_fct(response_emo, b_labels)
-        mood_mse_loss = mood_mse_lf(torch.sign(response_mood_vad), b_response_mood_vad)
-        mood_cls_loss = mood_cls_lf(response_mood_logits, b_response_mood_label)
-        
-        
-        
-        
-        
-        response_emo         = response_emo.detach().to('cpu').numpy()
-        label_ids            = b_labels.to('cpu').numpy()                
-        pred_flat            = np.argmax(response_emo, axis=1).flatten()
-        labels_flat          = label_ids.flatten()
-
-        response_mood_logits = response_mood_logits.detach().to('cpu').numpy()
-        mood_labels          = b_response_mood_label.to('cpu').numpy()
-        mood_pred            = np.argmax(response_mood_logits, axis=1).flatten()
-        mood_labels          = mood_labels.flatten()
+            response_mood_logits = response_mood_logits.detach().to('cpu').numpy()
+            mood_labels          = b_response_mood_label.to('cpu').numpy()
+            mood_pred            = np.argmax(response_mood_logits, axis=1).flatten()
+            mood_labels          = mood_labels.flatten()
 
 
-        pred_list        = np.append(pred_list, pred_flat)
-        labels_list      = np.append(labels_list, labels_flat)
+            pred_list        = np.append(pred_list, pred_flat)
+            labels_list      = np.append(labels_list, labels_flat)
 
-        pred_mood_list   = np.append(pred_mood_list, mood_pred)
-        mood_labels_list = np.append(mood_labels_list, mood_labels)
+            pred_mood_list   = np.append(pred_mood_list, mood_pred)
+            mood_labels_list = np.append(mood_labels_list, mood_labels)
+
+            f.write(tokenizer.decode(b_input_ids.squeeze()) + '\t')
+            f.write(tokenizer.decode(b_input_ids_3.squeeze())+ '\t')
+            f.write(str(mood_pred) + "\t" + str(mood_labels) + '\t')
+            f.write(str(pred_flat) + "\t" + str(labels_flat) + '\n')
 
 
     
@@ -445,7 +446,7 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
     if result['macro avg']['f1-score'] > best_macro:
         best_macro = result['macro avg']['f1-score']
         best_epoch = epoch
-        shutil.copyfile('result_file.txt', 'cls_best_result.txt')
+        shutil.copyfile('result_file.txt', 'Mood_'+args.mode+'_best_result.txt')
     
     return test_logs, pred_list, best_macro, best_epoch
 
