@@ -38,7 +38,7 @@ args.epochs        = 50
 seed_list = [42] # [41, 42, 123, 234, 345, 456, 567, 678, 789, 890]
 
 for seed in  seed_list:
-    for mode in ['4'] # ['1', '2', '3', '4']:
+    for mode in ['1', '2', '3', '4']:
         args.mode          = mode
         args.SEED          = seed
         args.result_name   = 'Mode_' + args.mode + '_seed_' + str(args.SEED) + '.csv'
