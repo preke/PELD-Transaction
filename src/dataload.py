@@ -1,10 +1,13 @@
 import pandas as pd
 import re
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from transformers import RobertaConfig, RobertaModel, RobertaTokenizer
 from transformers import BertTokenizer, BertConfig
 from sklearn.model_selection import train_test_split
+
 
 
 from utils import Emotion_dict, get_vad, Mood_dict, get_vad_dict
@@ -32,6 +35,35 @@ def get_sent_vad(VAD_dict, input_ids, tokenizer):
     d_score/=float(len(w_list))
     VAD_scores = [v_score, a_score, d_score]
     return VAD_scores
+
+
+def get_sent_vad_attention(VAD_dict, input_id_2, tokenizer, user_emo):
+
+    VAD_scores = []
+    w_list = re.sub(r'[^\w\s\[\]]','',tokenizer.decode(input_id_2)).split()
+    for word in w_list:
+        try:
+            VAD_scores.append([VAD_dict[word][0], VAD_dict[word][1], VAD_dict[word][2]])
+        except:
+            VAD_scores.append([0,0,0])
+
+    VAD_scores = torch.Tensor(VAD_scores)
+    user_emo = torch.Tensor(user_emo)
+    print(VAD_scores.shape) # sentence_length * 3
+    print(user_emo.shape) # 1 * 3
+    # inner
+    VAD_scores_weights = torch.inner(VAD_scores, user_emo) # sentence_length * 1
+    print(VAD_scores_weights.shape)
+    VAD_scores_weights = F.softmax(VAD_scores_weights) # sentence_length * 1
+
+    vad_attn = [0,0,0]
+    for i in range(len(VAD_scores)):
+        vad_attn[0] += VAD_scores[i][0] * VAD_scores_weights[i]
+        vad_attn[1] += VAD_scores[i][1] * VAD_scores_weights[i]
+        vad_attn[2] += VAD_scores[i][2] * VAD_scores_weights[i]
+    
+    return vad_attn
+
 
 def personality_to_vad(personality):
     '''
@@ -113,7 +145,9 @@ def load_data(args, DATA_PATH):
     
     
     # uttr_vad_1 = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids]
-    uttr_vad = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids_2]
+    # uttr_vad = [get_sent_vad(VAD_dict, i, tokenizer) for i in input_ids_2]
+    uttr_vad = [get_sent_vad_attention(VAD_dict, input_ids_2[i], tokenizer, user_emo[i]) for i in range(len(input_ids_2))]
+
     # i = 0
 
     # uttr_vad = [[uttr_vad_1[i][0]*0.5 + uttr_vad_2[i][0]*0.5, 
