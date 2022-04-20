@@ -41,7 +41,7 @@ for seed in  seed_list:
     for mode in ['4']:
         args.mode          = mode
         args.SEED          = seed
-        args.result_name   = 'Mode_' + args.mode + '_seed_' + str(args.SEED) + '.csv'
+        args.result_name   = 'attn_Mode_' + args.mode + '_seed_' + str(args.SEED) + '.csv'
 
         np.random.seed(args.SEED)
         torch.manual_seed(args.SEED)
