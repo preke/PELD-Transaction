@@ -97,7 +97,7 @@ class BERT_Emo_Generation(BertPreTrainedModel):
         response_mood_vad    = init_mood
 
         if self.mode == '6':
-            response_emo   = self.classifier(torch.cat((bert_hidden + self.personality_to_hidden(personality)),1))
+            response_emo   = self.classifier(torch.cat((bert_hidden, self.personality_to_hidden(personality)),1))
         else:
             response_emo   = self.classifier(bert_hidden)
             
