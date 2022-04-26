@@ -25,6 +25,7 @@ Mode 1: BERT
 Mode 2: BERT-Mood
 Mode 3: BERT-MT
 Mode 5: BERT-MTCP
+Mode 6: BERT-P
 Mode 4: Our model
 '''
 
@@ -39,7 +40,7 @@ args.epochs        = 50
 seed_list = [41, 42, 123, 234, 345, 456, 567, 678, 789, 890]
 
 for seed in  seed_list:
-    for mode in ['5']:
+    for mode in ['6']:
         args.mode          = mode
         args.SEED          = seed
         args.result_name   = 'Mode_' + args.mode + '_seed_' + str(args.SEED) + '.csv'

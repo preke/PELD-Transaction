@@ -66,7 +66,6 @@ class Emo_Generation(BertPreTrainedModel):
             emo_embedding        = torch.cat((self.mood_to_hidden(response_mood_vad), bert_hidden, 0*self.personality_to_hidden(personality)), 1)
         elif self.mode == '4' or self.mode == '5':
             emo_embedding        = torch.cat((self.mood_to_hidden(response_mood_vad), bert_hidden, self.personality_to_hidden(personality)), 1)
-
         
         response_emo_logits = self.classifier(emo_embedding)
         return response_mood_vad, response_mood_logits, response_emo_logits
@@ -77,23 +76,31 @@ class Emo_Generation(BertPreTrainedModel):
 
     
 class BERT_Emo_Generation(BertPreTrainedModel):
-
     def __init__(self, config, mode):
         super().__init__(config)
-        self.num_labels      = 7
-        self.bert            = BertModel(config)
-        self.mid_size        = 768
-        self.mode            = mode
-        self.mood_classifier = nn.Linear(self.mid_size, 4)
-        self.classifier      = nn.Linear(self.mid_size, 7)
+        self.num_labels            = 7
+        self.bert                  = BertModel(config)
+        self.mid_size              = 768
+        self.mode                  = mode
+        self.mood_classifier       = nn.Linear(self.mid_size, 4)
+        self.personality_to_hidden = nn.Linear(3, self.mid_size)
+        if self.mode == '6':
+            self.classifier        = nn.Linear(self.mid_size*2, 7)
+        else:
+            self.classifier        = nn.Linear(self.mid_size, 7)
 
     def forward(self, input_ids, attn_masks, uttr_vad, user_emo, personality, init_mood):
         
-        bert_outputs   = self.bert(input_ids, attention_mask=attn_masks)
-        bert_hidden    = bert_outputs[1]
+        bert_outputs         = self.bert(input_ids, attention_mask=attn_masks)
+        bert_hidden          = bert_outputs[1]
         response_mood_logits = self.mood_classifier(bert_hidden)
-        response_emo   = self.classifier(bert_hidden)
         response_mood_vad    = init_mood
+
+        if self.mode == '6':
+            response_emo   = self.classifier(bert_hidden + self.personality_to_hidden(personality))
+        else:
+            response_emo   = self.classifier(bert_hidden)
+            
         return response_mood_vad, response_mood_logits, response_emo
 
 
