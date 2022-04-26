@@ -49,11 +49,11 @@ def get_sent_vad_attention(VAD_dict, input_id_2, tokenizer, user_emo):
 
     VAD_scores = torch.Tensor(VAD_scores)
     user_emo = torch.Tensor(user_emo)
-    print(VAD_scores.shape) # sentence_length * 3
-    print(user_emo.shape) # 1 * 3
+    # print(VAD_scores.shape) # sentence_length * 3
+    # print(user_emo.shape) # 1 * 3
     # inner
     VAD_scores_weights = torch.inner(VAD_scores, user_emo) # sentence_length * 1
-    print(VAD_scores_weights.shape)
+    # print(VAD_scores_weights.shape)
     VAD_scores_weights = F.softmax(VAD_scores_weights) # sentence_length * 1
 
     vad_attn = [0,0,0]
