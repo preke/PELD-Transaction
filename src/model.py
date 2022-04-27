@@ -83,9 +83,9 @@ class BERT_Emo_Generation(BertPreTrainedModel):
         self.mid_size              = 768
         self.mode                  = mode
         self.mood_classifier       = nn.Linear(self.mid_size, 4)
-        self.personality_to_hidden = nn.Linear(3, self.mid_size)
+        # self.personality_to_hidden = nn.Linear(3, self.mid_size)
         if self.mode == '6':
-            self.classifier        = Dense(self.mid_size*2, self.mid_size*2, 7)
+            self.classifier        = nn.Linear(self.mid_size+3, 7)
         else:
             self.classifier        = nn.Linear(self.mid_size, 7)
 
@@ -97,7 +97,7 @@ class BERT_Emo_Generation(BertPreTrainedModel):
         response_mood_vad    = init_mood
 
         if self.mode == '6':
-            response_emo   = self.classifier(torch.cat((bert_hidden, self.personality_to_hidden(personality)),1))
+            response_emo   = self.classifier(torch.cat((bert_hidden, personality),1))
         else:
             response_emo   = self.classifier(bert_hidden)
             
