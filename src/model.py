@@ -85,7 +85,7 @@ class BERT_Emo_Generation(BertPreTrainedModel):
         self.mood_classifier       = nn.Linear(self.mid_size, 4)
         self.personality_to_hidden = nn.Linear(3, self.mid_size)
         if self.mode == '6':
-            self.classifier        = nn.Linear(self.mid_size*2, 7)
+            self.classifier        = Dense(self.mid_size*2, self.mid_size, 7)
         else:
             self.classifier        = nn.Linear(self.mid_size, 7)
 
