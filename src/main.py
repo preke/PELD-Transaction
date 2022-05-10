@@ -24,9 +24,10 @@ args.mode          = '1'
 Mode 1: BERT
 Mode 2: BERT-Mood
 Mode 3: BERT-MT
+Mode 4: Our model
 Mode 5: BERT-MTCP
 Mode 6: BERT-P
-Mode 4: Our model
+Mode 7: Given Mood
 '''
 
 
@@ -37,10 +38,10 @@ args.adam_epsilon  = 1e-8
 args.epochs        = 50
 
 
-seed_list =     [41, 42, 123, 234, 345, 456, 567, 678, 789, 890]
+seed_list =     [41, 42, 123, 456, 567, 678, 789, 890]
 
 for seed in  seed_list:
-    for mode in ['6']:
+    for mode in ['7']:
         args.mode          = mode
         args.SEED          = seed
         args.result_name   = 'new_Mode_' + args.mode + '_seed_' + str(args.SEED) + '.csv'

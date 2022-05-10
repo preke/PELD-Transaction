@@ -123,6 +123,8 @@ def train_model(model, args, train_dataloader, valid_dataloader, test_dataloader
             b_input_ids, b_input_ids_2, b_input_ids_3, b_attn_masks, b_attn_masks_2,\
             b_uttr_vad, b_personality, b_init_emo, b_user_emo, b_response_emo, \
             b_init_mood, b_response_mood_vad, b_response_mood_label, b_labels = batch
+            if args.mode == '7': # given mood
+                b_init_mood = b_response_mood_vad
             
             response_mood_vad, response_mood_logits, response_emo = model(b_input_ids, b_attn_masks, b_uttr_vad, b_user_emo, b_personality, b_init_mood)
             
@@ -292,7 +294,9 @@ def eval_model(model, valid_dataloader, args, valid_logs):
         b_input_ids, b_input_ids_2, b_input_ids_3, b_attn_masks, b_attn_masks_2,\
         b_uttr_vad, b_personality, b_init_emo, b_user_emo, b_response_emo, \
         b_init_mood, b_response_mood_vad, b_response_mood_label, b_labels = batch
-        
+        if args.mode == '7': # given mood
+                b_init_mood = b_response_mood_vad
+
         with torch.no_grad():
             response_mood_vad, response_mood_logits, response_emo = model(b_input_ids, b_attn_masks, b_uttr_vad, b_user_emo, b_personality, b_init_mood)
         
@@ -380,6 +384,8 @@ def test_model(model, test_dataloader, args, test_logs, best_macro=0.0, best_epo
             b_uttr_vad, b_personality, b_init_emo, b_user_emo, b_response_emo, \
             b_init_mood, b_response_mood_vad, b_response_mood_label, b_labels = batch
 
+            if args.mode == '7': # given mood
+                b_init_mood = b_response_mood_vad
             with torch.no_grad():
                 response_mood_vad, response_mood_logits, response_emo = model(b_input_ids, b_attn_masks, b_uttr_vad, b_user_emo, b_personality, b_init_mood)
             
