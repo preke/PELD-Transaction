@@ -65,7 +65,7 @@ for seed in  seed_list:
         else:
             if args.mode == '1' or args.mode =='2' or args.mode =='6':
                 model = BERT_Emo_Generation.from_pretrained('bert-base-uncased', mode=args.mode).cuda(args.device)
-            elif args.mode =='3' or args.mode =='4' or args.mode =='5':
+            elif args.mode =='3' or args.mode =='4' or args.mode =='5' or args.mode =='7':
                 model = Emo_Generation.from_pretrained('bert-base-uncased', mode=args.mode).cuda(args.device)
             
             
